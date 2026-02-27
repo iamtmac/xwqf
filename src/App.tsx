@@ -1,0 +1,634 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
+import { 
+  Search, 
+  Rocket, 
+  ShieldCheck, 
+  TrendingUp, 
+  Users, 
+  ChevronRight, 
+  CheckCircle2, 
+  AlertCircle,
+  BarChart3,
+  Cpu,
+  Globe,
+  Briefcase,
+  ArrowRight,
+  Loader2,
+  Sparkles
+} from 'lucide-react';
+import { 
+  LineChart, 
+  Line, 
+  XAxis, 
+  YAxis, 
+  CartesianGrid, 
+  Tooltip, 
+  ResponsiveContainer,
+  AreaChart,
+  Area
+} from 'recharts';
+import { GoogleGenAI } from "@google/genai";
+import { cn } from './lib/utils';
+import { EnterpriseProfile, GrowthMilestone, ServiceMatch, SuccessCase } from './types';
+
+// --- Mock Data for Visualization ---
+const growthData = [
+  { month: '1月', value: 40, pred: 40 },
+  { month: '2月', value: 45, pred: 45 },
+  { month: '3月', value: 55, pred: 55 },
+  { month: '4月', value: 62, pred: 62 },
+  { month: '5月', value: null, pred: 75 },
+  { month: '6月', value: null, pred: 90 },
+  { month: '7月', value: null, pred: 110 },
+];
+
+export default function App() {
+  const [step, setStep] = useState<'landing' | 'searching' | 'confirming' | 'dashboard'>('landing');
+  const [companyName, setCompanyName] = useState('');
+  const [profile, setProfile] = useState<EnterpriseProfile | null>(null);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [selectedCase, setSelectedCase] = useState<(SuccessCase & { details: string, path: string[] }) | null>(null);
+
+  const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || '' });
+
+  const handleSearch = async () => {
+    if (!companyName) return;
+    setStep('searching');
+    
+    // Special handling for SenseTime to show deep development path
+    if (companyName.includes('商汤') || companyName.toLowerCase().includes('sensetime')) {
+      setTimeout(() => {
+        setProfile({
+          name: "商汤科技 (SenseTime)",
+          industry: "人工智能 / 计算机视觉",
+          stage: "成熟期",
+          description: "全球领先的人工智能软件公司，专注于计算机视觉和深度学习技术。业务涵盖智慧城市、智慧商业、智慧生活和智能汽车四大板块。",
+          keyTech: ["深度学习平台 SenseParrot", "超算中心 AIDC", "通用大模型 SenseNova"],
+          competitors: ["旷视科技", "依图科技", "云从科技", "海康威视"],
+          fundingStatus: "已上市 (HKEX: 0020)",
+          revenue: "约 38 亿人民币 (2023)",
+          employeeCount: "5000+"
+        });
+        setStep('confirming');
+      }, 1500);
+      return;
+    }
+
+    try {
+      const response = await ai.models.generateContent({
+        model: "gemini-3-flash-preview",
+        contents: `你是一个专业的企业咨询顾问。请联网搜索并分析名为"${companyName}"的企业。
+        如果找不到真实企业，请根据名称猜测其可能的业务方向，生成一个合理的模拟画像。
+        返回JSON格式：
+        {
+          "name": "企业名称",
+          "industry": "所属行业",
+          "stage": "种子期/初创期/成长期/成熟期",
+          "description": "企业简介",
+          "keyTech": ["技术关键词1", "2"],
+          "competitors": ["竞品1", "2"],
+          "fundingStatus": "当前融资状态"
+        }`,
+        config: { 
+          responseMimeType: "application/json",
+          tools: [{ googleSearch: {} }] 
+        }
+      });
+
+      const data = JSON.parse(response.text || '{}');
+      setProfile(data);
+      setStep('confirming');
+    } catch (error) {
+      console.error("Search failed:", error);
+      // Fallback mock
+      setProfile({
+        name: companyName,
+        industry: "科技创新",
+        stage: "初创期",
+        description: "一家专注于前沿技术研发的科创企业。",
+        keyTech: ["人工智能", "大数据"],
+        competitors: ["行业头部企业A", "创新公司B"],
+        fundingStatus: "天使轮"
+      });
+      setStep('confirming');
+    }
+  };
+
+  const startAnalysis = () => {
+    setIsAnalyzing(true);
+    setTimeout(() => {
+      setStep('dashboard');
+      setIsAnalyzing(false);
+    }, 2000);
+  };
+
+  return (
+    <div className="min-h-screen bg-[#F8FAFC] text-slate-900 font-sans selection:bg-indigo-100">
+      {/* Navigation */}
+      <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-bottom border-slate-200 px-6 py-4 flex justify-between items-center">
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-white">
+            <Sparkles size={20} />
+          </div>
+          <span className="font-bold text-xl tracking-tight">小湾企服 <span className="text-indigo-600">Pro</span></span>
+        </div>
+        <div className="hidden md:flex items-center gap-6 text-sm font-medium text-slate-600">
+          <a href="#" className="hover:text-indigo-600 transition-colors">智能基金</a>
+          <a href="#" className="hover:text-indigo-600 transition-colors">融资服务</a>
+          <a href="#" className="hover:text-indigo-600 transition-colors">数据安全</a>
+          <button className="bg-slate-900 text-white px-4 py-2 rounded-full hover:bg-slate-800 transition-all">
+            管理后台
+          </button>
+        </div>
+      </nav>
+
+      <main className="max-w-7xl mx-auto px-6 py-12">
+        <AnimatePresence mode="wait">
+          {step === 'landing' && (
+            <motion.div 
+              key="landing"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="text-center max-w-3xl mx-auto py-20"
+            >
+              <h1 className="text-5xl md:text-6xl font-extrabold tracking-tight mb-6 bg-gradient-to-r from-slate-900 via-indigo-900 to-slate-900 bg-clip-text text-transparent">
+                从“大水漫灌”到“精准滴灌”
+              </h1>
+              <p className="text-lg text-slate-600 mb-10 leading-relaxed">
+                输入企业名称，开启全生命周期智能规划。我们通过大数据与AI，为您的企业预判未来，匹配最精准的政策、基金与安全保障。
+              </p>
+              
+              <div className="relative max-w-xl mx-auto group">
+                <div className="absolute -inset-1 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
+                <div className="relative flex items-center bg-white rounded-2xl shadow-xl border border-slate-200 p-2">
+                  <Search className="ml-4 text-slate-400" size={24} />
+                  <input 
+                    type="text" 
+                    placeholder="输入您的企业全称..."
+                    className="flex-1 px-4 py-3 outline-none text-lg"
+                    value={companyName}
+                    onChange={(e) => setCompanyName(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                  />
+                  <button 
+                    onClick={handleSearch}
+                    className="bg-indigo-600 text-white px-8 py-3 rounded-xl font-semibold hover:bg-indigo-700 transition-all flex items-center gap-2"
+                  >
+                    智能识别 <ArrowRight size={18} />
+                  </button>
+                </div>
+              </div>
+              
+              <div className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-8 opacity-60">
+                <div className="flex flex-col items-center gap-2">
+                  <div className="text-2xl font-bold">10k+</div>
+                  <div className="text-xs uppercase tracking-widest font-semibold">服务企业</div>
+                </div>
+                <div className="flex flex-col items-center gap-2">
+                  <div className="text-2xl font-bold">¥50B+</div>
+                  <div className="text-xs uppercase tracking-widest font-semibold">撮合融资</div>
+                </div>
+                <div className="flex flex-col items-center gap-2">
+                  <div className="text-2xl font-bold">98%</div>
+                  <div className="text-xs uppercase tracking-widest font-semibold">精准匹配率</div>
+                </div>
+                <div className="flex flex-col items-center gap-2">
+                  <div className="text-2xl font-bold">24/7</div>
+                  <div className="text-xs uppercase tracking-widest font-semibold">智能监控</div>
+                </div>
+              </div>
+            </motion.div>
+          )}
+
+          {step === 'searching' && (
+            <motion.div 
+              key="searching"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="flex flex-col items-center justify-center py-40"
+            >
+              <div className="relative">
+                <div className="w-24 h-24 border-4 border-indigo-100 border-t-indigo-600 rounded-full animate-spin"></div>
+                <div className="absolute inset-0 flex items-center justify-center text-indigo-600">
+                  <Globe size={32} className="animate-pulse" />
+                </div>
+              </div>
+              <h2 className="mt-8 text-2xl font-bold">正在全网检索企业资料...</h2>
+              <p className="mt-2 text-slate-500">正在调取工商信息、新闻动态及行业趋势数据</p>
+            </motion.div>
+          )}
+
+          {step === 'confirming' && profile && (
+            <motion.div 
+              key="confirming"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="max-w-4xl mx-auto"
+            >
+              <div className="bg-white rounded-3xl shadow-2xl border border-slate-200 overflow-hidden">
+                <div className="bg-indigo-600 p-8 text-white">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <h2 className="text-3xl font-bold mb-2">{profile.name}</h2>
+                      <div className="flex gap-2">
+                        <span className="bg-white/20 px-3 py-1 rounded-full text-xs font-medium backdrop-blur-sm">
+                          {profile.industry}
+                        </span>
+                        <span className="bg-white/20 px-3 py-1 rounded-full text-xs font-medium backdrop-blur-sm">
+                          {profile.stage}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="bg-white/10 p-3 rounded-2xl backdrop-blur-md border border-white/20">
+                      <CheckCircle2 size={24} />
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="p-8 grid md:grid-cols-2 gap-12">
+                  <div>
+                    <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4">企业画像核实</h3>
+                    <p className="text-slate-700 leading-relaxed mb-6">
+                      {profile.description}
+                    </p>
+                    
+                    <div className="space-y-4">
+                      <div className="grid grid-cols-2 gap-4 mb-4">
+                        {profile.revenue && (
+                          <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                            <div className="text-[10px] font-bold text-slate-400 uppercase">年度营收</div>
+                            <div className="text-sm font-bold text-slate-700">{profile.revenue}</div>
+                          </div>
+                        )}
+                        {profile.employeeCount && (
+                          <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                            <div className="text-[10px] font-bold text-slate-400 uppercase">人员规模</div>
+                            <div className="text-sm font-bold text-slate-700">{profile.employeeCount}</div>
+                          </div>
+                        )}
+                      </div>
+                      <div>
+                        <span className="text-xs font-bold text-slate-400 uppercase">核心技术</span>
+                        <div className="flex flex-wrap gap-2 mt-2">
+                          {profile.keyTech.map(tech => (
+                            <span key={tech} className="bg-indigo-50 text-indigo-700 px-3 py-1 rounded-lg text-sm font-medium border border-indigo-100">
+                              {tech}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                      <div>
+                        <span className="text-xs font-bold text-slate-400 uppercase">行业竞品</span>
+                        <div className="flex flex-wrap gap-2 mt-2">
+                          {profile.competitors.map(comp => (
+                            <span key={comp} className="bg-slate-100 text-slate-600 px-3 py-1 rounded-lg text-sm font-medium">
+                              {comp}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="bg-slate-50 rounded-2xl p-6 border border-slate-100">
+                    <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
+                      <TrendingUp className="text-indigo-600" size={20} />
+                      初步诊断建议
+                    </h3>
+                    <ul className="space-y-4">
+                      <li className="flex gap-3">
+                        <div className="w-6 h-6 rounded-full bg-green-100 text-green-600 flex items-center justify-center shrink-0">
+                          <CheckCircle2 size={14} />
+                        </div>
+                        <p className="text-sm text-slate-600">您的技术方向与当前“智能制造”专项补贴高度契合。</p>
+                      </li>
+                      <li className="flex gap-3">
+                        <div className="w-6 h-6 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center shrink-0">
+                          <AlertCircle size={14} />
+                        </div>
+                        <p className="text-sm text-slate-600">检测到同行业近期有大规模数据泄露事件，建议升级数据安全等级。</p>
+                      </li>
+                      <li className="flex gap-3">
+                        <div className="w-6 h-6 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center shrink-0">
+                          <Rocket size={14} />
+                        </div>
+                        <p className="text-sm text-slate-600">当前融资进度落后于同类竞品，建议开启新一轮融资规划。</p>
+                      </li>
+                    </ul>
+                    
+                    <button 
+                      onClick={startAnalysis}
+                      disabled={isAnalyzing}
+                      className="w-full mt-8 bg-slate-900 text-white py-4 rounded-xl font-bold hover:bg-slate-800 transition-all flex items-center justify-center gap-2 shadow-lg shadow-slate-200"
+                    >
+                      {isAnalyzing ? (
+                        <><Loader2 className="animate-spin" size={20} /> 正在生成全生命周期规划...</>
+                      ) : (
+                        "确认信息并生成智能规划"
+                      )}
+                    </button>
+                    <p className="text-[10px] text-slate-400 text-center mt-4">
+                      * 基于小湾企服“智能画像引擎”自动生成，数据安全受“小湾安全盾”保护
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          )}
+
+          {step === 'dashboard' && profile && (
+            <motion.div 
+              key="dashboard"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="space-y-8"
+            >
+              <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div>
+                  <h1 className="text-3xl font-bold">{profile.name} · 成长导航</h1>
+                  <p className="text-slate-500">基于 AI 预测的未来 12 个月发展路线图</p>
+                </div>
+                <div className="flex gap-3">
+                  <button className="bg-white border border-slate-200 px-4 py-2 rounded-xl text-sm font-semibold hover:bg-slate-50 transition-all flex items-center gap-2">
+                    导出报告
+                  </button>
+                  <button className="bg-indigo-600 text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-indigo-700 transition-all flex items-center gap-2">
+                    联系专属顾问
+                  </button>
+                </div>
+              </div>
+
+              {/* Grid Layout */}
+              <div className="grid lg:grid-cols-3 gap-8">
+                {/* Growth Prediction */}
+                <div className="lg:col-span-2 bg-white p-8 rounded-3xl shadow-sm border border-slate-200">
+                  <div className="flex justify-between items-center mb-8">
+                    <h3 className="text-xl font-bold flex items-center gap-2">
+                      <TrendingUp className="text-indigo-600" size={24} />
+                      成长潜力预测
+                    </h3>
+                    <div className="flex gap-4 text-xs font-bold uppercase tracking-wider">
+                      <div className="flex items-center gap-1.5">
+                        <div className="w-3 h-3 bg-indigo-600 rounded-full"></div>
+                        <span>历史数据</span>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <div className="w-3 h-3 bg-indigo-300 rounded-full"></div>
+                        <span>AI 预测</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="h-[300px] w-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <AreaChart data={growthData}>
+                        <defs>
+                          <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="#4F46E5" stopOpacity={0.1}/>
+                            <stop offset="95%" stopColor="#4F46E5" stopOpacity={0}/>
+                          </linearGradient>
+                        </defs>
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F1F5F9" />
+                        <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{fill: '#94A3B8', fontSize: 12}} />
+                        <YAxis hide />
+                        <Tooltip 
+                          contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
+                        />
+                        <Area type="monotone" dataKey="pred" stroke="#C7D2FE" fill="transparent" strokeWidth={2} strokeDasharray="5 5" />
+                        <Area type="monotone" dataKey="value" stroke="#4F46E5" fillOpacity={1} fill="url(#colorValue)" strokeWidth={3} />
+                      </AreaChart>
+                    </ResponsiveContainer>
+                  </div>
+                  <div className="mt-6 p-4 bg-indigo-50 rounded-2xl border border-indigo-100 flex items-start gap-3">
+                    <Sparkles className="text-indigo-600 shrink-0" size={20} />
+                    <p className="text-sm text-indigo-900">
+                      {profile.name.includes('商汤') 
+                        ? "AI 深度分析：商汤科技在通用大模型 SenseNova 的持续投入已进入产出期，预计下半年智慧城市业务将触底反弹，建议关注 AIDC 算力租赁的毛利贡献。"
+                        : `预测显示：由于您在${profile.keyTech[0]}领域的持续投入，预计 6 月份将迎来业务爆发期，建议提前储备人才与服务器资源。`}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Future Elements Matching */}
+                <div className="bg-slate-900 text-white p-8 rounded-3xl shadow-xl">
+                  <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
+                    <Cpu size={24} />
+                    未来要素匹配
+                  </h3>
+                  <div className="space-y-6">
+                    <div className="p-4 bg-white/5 rounded-2xl border border-white/10">
+                      <div className="flex justify-between items-center mb-2">
+                        <span className="text-sm font-medium text-slate-400">人才缺口</span>
+                        <span className="text-xs bg-indigo-500 px-2 py-0.5 rounded">高匹配</span>
+                      </div>
+                      <div className="text-lg font-bold">高级算法工程师 (3名)</div>
+                      <p className="text-xs text-slate-500 mt-1">匹配小湾人才库，已锁定 12 名候选人</p>
+                    </div>
+                    <div className="p-4 bg-white/5 rounded-2xl border border-white/10">
+                      <div className="flex justify-between items-center mb-2">
+                        <span className="text-sm font-medium text-slate-400">政策匹配</span>
+                        <span className="text-xs bg-emerald-500 px-2 py-0.5 rounded">可申请</span>
+                      </div>
+                      <div className="text-lg font-bold">高新技术企业认定</div>
+                      <p className="text-xs text-slate-500 mt-1">预计可减免税收 ¥200k/年</p>
+                    </div>
+                    <div className="p-4 bg-white/5 rounded-2xl border border-white/10">
+                      <div className="flex justify-between items-center mb-2">
+                        <span className="text-sm font-medium text-slate-400">办公空间</span>
+                        <span className="text-xs bg-blue-500 px-2 py-0.5 rounded">扩容预警</span>
+                      </div>
+                      <div className="text-lg font-bold">小湾科创园 B座 500㎡</div>
+                      <p className="text-xs text-slate-500 mt-1">预计 8 月份当前空间将达到饱和</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Integrated Services */}
+                <div className="lg:col-span-3 grid md:grid-cols-3 gap-8">
+                  {/* Smart Fund */}
+                  <div className="bg-white p-6 rounded-3xl border border-slate-200 hover:shadow-lg transition-all group">
+                    <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                      <Briefcase size={24} />
+                    </div>
+                    <h4 className="text-lg font-bold mb-2">智能基金大模型</h4>
+                    <p className="text-sm text-slate-500 mb-4">已为您匹配 3 支政府引导基金，平均匹配度 92%。</p>
+                    <button className="text-blue-600 text-sm font-bold flex items-center gap-1 hover:gap-2 transition-all">
+                      查看匹配详情 <ChevronRight size={16} />
+                    </button>
+                  </div>
+
+                  {/* Financing Service */}
+                  <div className="bg-white p-6 rounded-3xl border border-slate-200 hover:shadow-lg transition-all group">
+                    <div className="w-12 h-12 bg-purple-100 text-purple-600 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                      <Users size={24} />
+                    </div>
+                    <h4 className="text-lg font-bold mb-2">融资撮合服务</h4>
+                    <p className="text-sm text-slate-500 mb-4">检测到 5 家活跃 VC 近期关注您的赛道，建议开启路演。</p>
+                    <button className="text-purple-600 text-sm font-bold flex items-center gap-1 hover:gap-2 transition-all">
+                      预约投融资对接 <ChevronRight size={16} />
+                    </button>
+                  </div>
+
+                  {/* Data Security */}
+                  <div className="bg-white p-6 rounded-3xl border border-slate-200 hover:shadow-lg transition-all group">
+                    <div className="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                      <ShieldCheck size={24} />
+                    </div>
+                    <h4 className="text-lg font-bold mb-2">数据安全服务</h4>
+                    <p className="text-sm text-slate-500 mb-4">您的核心专利数据需要加密加固，已为您开启 24h 监控。</p>
+                    <button className="text-emerald-600 text-sm font-bold flex items-center gap-1 hover:gap-2 transition-all">
+                      查看安全报告 <ChevronRight size={16} />
+                    </button>
+                  </div>
+                </div>
+
+                {/* Success Cases */}
+                <div className="lg:col-span-3">
+                  <div className="flex justify-between items-end mb-6">
+                    <div>
+                      <h3 className="text-xl font-bold">行业对标与成功案例</h3>
+                      <p className="text-sm text-slate-500">为您匹配路径相似度 {">"}70% 的标杆企业</p>
+                    </div>
+                    <button className="text-indigo-600 text-sm font-bold">查看更多案例</button>
+                  </div>
+                  <div className="grid md:grid-cols-2 gap-8">
+                    <div 
+                      onClick={() => setSelectedCase({
+                        name: "某智能视觉初创企业",
+                        industry: "人工智能",
+                        achievement: "估值提升 30%",
+                        similarity: 85,
+                        image: "https://picsum.photos/seed/tech1/200/200",
+                        details: "该企业在 A 轮融资前，通过小湾企服进行了全面的数据合规改造和专利布局优化，成功吸引了顶级 VC 关注。",
+                        path: ["种子期：技术原型验证", "初创期：数据合规审计", "成长期：专利导航分析"]
+                      })}
+                      className="bg-white p-6 rounded-3xl border border-slate-200 flex gap-6 items-start cursor-pointer hover:border-indigo-300 hover:shadow-md transition-all"
+                    >
+                      <div className="w-20 h-20 bg-slate-100 rounded-2xl shrink-0 overflow-hidden">
+                        <img src="https://picsum.photos/seed/tech1/200/200" alt="Case 1" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                      </div>
+                      <div>
+                        <h5 className="font-bold text-lg">某智能视觉初创企业</h5>
+                        <p className="text-sm text-slate-500 mt-1">通过小湾企服在 A 轮融资前完成了数据合规改造，估值提升 30%。</p>
+                        <div className="mt-3 flex items-center gap-2 text-xs font-bold text-indigo-600">
+                          <span className="bg-indigo-50 px-2 py-0.5 rounded">路径复刻度 85%</span>
+                          <span className="w-1 h-1 bg-slate-300 rounded-full"></span>
+                          <span>点击查看路径</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div 
+                      onClick={() => setSelectedCase({
+                        name: "某生物医药研发平台",
+                        industry: "生物医药",
+                        achievement: "获 500 万政府引导基金",
+                        similarity: 72,
+                        image: "https://picsum.photos/seed/tech2/200/200",
+                        details: "利用小湾智能基金大模型，精准匹配了 3 项省级专项补贴，并由小湾顾问协助完成了申报流程。",
+                        path: ["政策扫描", "条件对标", "智能申报", "获批公示"]
+                      })}
+                      className="bg-white p-6 rounded-3xl border border-slate-200 flex gap-6 items-start cursor-pointer hover:border-indigo-300 hover:shadow-md transition-all"
+                    >
+                      <div className="w-20 h-20 bg-slate-100 rounded-2xl shrink-0 overflow-hidden">
+                        <img src="https://picsum.photos/seed/tech2/200/200" alt="Case 2" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                      </div>
+                      <div>
+                        <h5 className="font-bold text-lg">某生物医药研发平台</h5>
+                        <p className="text-sm text-slate-500 mt-1">利用智能基金大模型精准匹配，成功申请 500 万政府引导基金。</p>
+                        <div className="mt-3 flex items-center gap-2 text-xs font-bold text-indigo-600">
+                          <span className="bg-indigo-50 px-2 py-0.5 rounded">路径复刻度 72%</span>
+                          <span className="w-1 h-1 bg-slate-300 rounded-full"></span>
+                          <span>点击查看路径</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </main>
+
+      {/* Case Modal */}
+      <AnimatePresence>
+        {selectedCase && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setSelectedCase(null)}
+              className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
+            />
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              className="relative bg-white w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden"
+            >
+              <div className="p-8">
+                <div className="flex justify-between items-start mb-6">
+                  <div>
+                    <h4 className="text-2xl font-bold">{selectedCase.name}</h4>
+                    <span className="text-indigo-600 font-bold text-sm">{selectedCase.achievement}</span>
+                  </div>
+                  <button onClick={() => setSelectedCase(null)} className="p-2 hover:bg-slate-100 rounded-full transition-colors">
+                    <AlertCircle className="rotate-45" size={24} />
+                  </button>
+                </div>
+                <p className="text-slate-600 mb-8 leading-relaxed">{selectedCase.details}</p>
+                <div className="space-y-4">
+                  <h5 className="text-sm font-bold text-slate-400 uppercase tracking-widest">复刻路径</h5>
+                  <div className="space-y-3">
+                    {selectedCase.path.map((p: string, i: number) => (
+                      <div key={i} className="flex items-center gap-3">
+                        <div className="w-6 h-6 rounded-full bg-indigo-600 text-white text-[10px] flex items-center justify-center font-bold">
+                          {i + 1}
+                        </div>
+                        <span className="text-sm font-medium text-slate-700">{p}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <button 
+                  onClick={() => setSelectedCase(null)}
+                  className="w-full mt-10 bg-indigo-600 text-white py-4 rounded-xl font-bold hover:bg-indigo-700 transition-all"
+                >
+                  复刻此成长路径
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Mobile Bottom Nav (Simulated) */}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 px-6 py-3 flex justify-between items-center z-50">
+        <div className="flex flex-col items-center gap-1 text-indigo-600">
+          <Sparkles size={20} />
+          <span className="text-[10px] font-bold">首页</span>
+        </div>
+        <div className="flex flex-col items-center gap-1 text-slate-400">
+          <BarChart3 size={20} />
+          <span className="text-[10px] font-bold">规划</span>
+        </div>
+        <div className="flex flex-col items-center gap-1 text-slate-400">
+          <ShieldCheck size={20} />
+          <span className="text-[10px] font-bold">安全</span>
+        </div>
+        <div className="flex flex-col items-center gap-1 text-slate-400">
+          <Users size={20} />
+          <span className="text-[10px] font-bold">我的</span>
+        </div>
+      </div>
+    </div>
+  );
+}

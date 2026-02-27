@@ -1,0 +1,7 @@
+{
+  "name": "小湾企服·智能成长导航",
+  "description": "基于大模型的科创企业全生命周期智能服务平台，提供精准画像、未来规划、融资匹配及数据安全服务。",
+  "requestFramePermissions": [
+    "geolocation"
+  ]
+}
