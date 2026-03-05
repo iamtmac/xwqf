@@ -171,9 +171,12 @@ export default function App() {
               exit={{ opacity: 0, y: -20 }}
               className="text-center max-w-3xl mx-auto py-20"
             >
-              <h1 className="text-5xl md:text-6xl font-extrabold tracking-tight mb-6 bg-gradient-to-r from-slate-900 via-indigo-900 to-slate-900 bg-clip-text text-transparent">
+              <h1 className="text-5xl md:text-6xl font-extrabold tracking-tight mb-2 bg-gradient-to-r from-slate-900 via-indigo-900 to-slate-900 bg-clip-text text-transparent">
                 从“大水漫灌”到“精准滴灌”
               </h1>
+              <p className="text-xl font-medium text-indigo-600/80 mb-6 tracking-widest">
+                开启“一行一策 千企千略”精准服务范式
+              </p>
               <p className="text-lg text-slate-600 mb-10 leading-relaxed">
                 输入企业名称，开启全生命周期智能规划。我们通过大数据与AI，为您的企业预判未来，匹配最精准的政策、基金与安全保障。
               </p>
