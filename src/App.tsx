@@ -171,6 +171,7 @@ export default function App() {
   const [isEditingDesc, setIsEditingDesc] = useState(false);
   const [tempDesc, setTempDesc] = useState('');
   const [dynamicRisks, setDynamicRisks] = useState<string[]>([]);
+  const [jiaxingCustomer, setJiaxingCustomer] = useState<{ name: string, reason: string } | null>(null);
 
   const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || '' });
 
@@ -251,12 +252,25 @@ export default function App() {
           "核心算法被开源技术替代的风险",
           "地缘政治导致的高端芯片断供风险"
         ]);
+        setJiaxingCustomer({
+          name: "嘉兴敏实集团 (Minth Group)",
+          reason: "敏实集团作为全球汽车零部件百强，正大力推进智慧工厂建设，对计算机视觉与工业质检有巨大需求。"
+        });
       } else {
         setDynamicRisks([
           `${profile.industry}领域准入门槛提高的政策风险`,
           `核心技术${profile.keyTech[0]}被颠覆的风险`,
           `与${profile.competitors[0]}等竞品的同质化竞争风险`
         ]);
+        
+        // Generic Jiaxing customer based on industry or just a reasonable guess
+        const jiaxingCompanies = [
+          { name: "嘉兴卫星化学", reason: "作为化工龙头，其数字化转型与安全监控系统升级是您的潜在切入点。" },
+          { name: "嘉兴合盛硅业", reason: "光伏材料领军企业，对自动化生产线优化有持续的采购意向。" },
+          { name: "嘉兴福莱特玻璃", reason: "全球光伏玻璃巨头，正在寻求更高效的供应链管理解决方案。" }
+        ];
+        const randomCompany = jiaxingCompanies[Math.floor(Math.random() * jiaxingCompanies.length)];
+        setJiaxingCustomer(randomCompany);
       }
     }
 
@@ -738,6 +752,18 @@ export default function App() {
                       <div className="text-lg font-bold">小湾科创园 B座 500㎡</div>
                       <p className="text-xs text-slate-500 mt-1">预计 8 月份当前空间将达到饱和</p>
                     </div>
+                    {jiaxingCustomer && (
+                      <div className="p-4 bg-indigo-500/10 rounded-2xl border border-indigo-500/20">
+                        <div className="flex justify-between items-center mb-2">
+                          <span className="text-sm font-medium text-indigo-300">嘉兴潜在商机</span>
+                          <span className="text-xs bg-indigo-600 px-2 py-0.5 rounded">本地推荐</span>
+                        </div>
+                        <div className="text-lg font-bold text-indigo-200">{jiaxingCustomer.name}</div>
+                        <p className="text-xs text-slate-400 mt-1 leading-relaxed">
+                          {jiaxingCustomer.reason}
+                        </p>
+                      </div>
+                    )}
                   </div>
                 </div>
 
