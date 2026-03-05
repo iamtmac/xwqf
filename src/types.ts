@@ -8,6 +8,7 @@ export interface EnterpriseProfile {
   fundingStatus: string;
   revenue?: string;
   employeeCount?: string;
+  industryChallenges?: string[];
 }
 
 export interface GrowthMilestone {
@@ -17,6 +18,7 @@ export interface GrowthMilestone {
   needs: string[];
   recommendations: string[];
   riskLevel: 'low' | 'medium' | 'high';
+  potentialRisks?: string[];
 }
 
 export interface SuccessCase {

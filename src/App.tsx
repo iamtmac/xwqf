@@ -46,17 +46,121 @@ import { EnterpriseProfile, GrowthMilestone, ServiceMatch, SuccessCase } from '.
 
 // --- Mock Data for Visualization (10-Year Trajectory) ---
 const growthData = [
-  { year: '2024', value: 40, pred: 40, milestone: '申报科技型中小企业' },
-  { year: '2025', value: 55, pred: 55, milestone: '人员突破 100 人' },
-  { year: '2026', value: 72, pred: 72, milestone: '申报高新技术企业' },
-  { year: '2027', value: null, pred: 95, milestone: '申报专精特新“小巨人”' },
-  { year: '2028', value: null, pred: 130, milestone: '人员突破 500 人' },
-  { year: '2029', value: null, pred: 180, milestone: '申报省级重点实验室' },
-  { year: '2030', value: null, pred: 260, milestone: '人员突破 1000 人' },
-  { year: '2031', value: null, pred: 380, milestone: '申报国家级工程中心' },
-  { year: '2032', value: null, pred: 520, milestone: '人员突破 2000 人' },
-  { year: '2033', value: null, pred: 700, milestone: '申报行业标准领跑者' },
+  { year: '2024', value: 40, pred: 40, milestone: '申报科技型中小企业', potentialRisks: ['研发投入不足', '核心人才流失'] },
+  { year: '2025', value: 55, pred: 55, milestone: '人员突破 100 人', potentialRisks: ['管理成本激增', '企业文化稀释'] },
+  { year: '2026', value: 72, pred: 72, milestone: '申报高新技术企业', potentialRisks: ['知识产权纠纷', '技术迭代滞后'] },
+  { year: '2027', value: null, pred: 95, milestone: '申报专精特新“小巨人”', potentialRisks: ['市场竞争加剧', '供应链波动'] },
+  { year: '2028', value: null, pred: 130, milestone: '人员突破 500 人', potentialRisks: ['组织架构僵化', '现金流压力'] },
+  { year: '2029', value: null, pred: 180, milestone: '申报省级重点实验室', potentialRisks: ['科研成果转化难', '政策环境变化'] },
+  { year: '2030', value: null, pred: 260, milestone: '人员突破 1000 人', potentialRisks: ['全球化扩张阻力', '合规性风险'] },
+  { year: '2031', value: null, pred: 380, milestone: '申报国家级工程中心', potentialRisks: ['技术瓶颈突破难', '品牌声誉风险'] },
+  { year: '2032', value: null, pred: 520, milestone: '人员突破 2000 人', potentialRisks: ['大企业病', '市场饱和'] },
+  { year: '2033', value: null, pred: 700, milestone: '申报行业标准领跑者', potentialRisks: ['颠覆性技术冲击', '反垄断审查'] },
 ];
+
+// --- AI Background Animation Component ---
+const BackgroundAI = () => {
+  return (
+    <div className="fixed inset-0 overflow-hidden pointer-events-none z-[-1]">
+      {/* Animated Gradient Blobs */}
+      <motion.div
+        animate={{
+          scale: [1, 1.2, 1],
+          x: [0, 100, 0],
+          y: [0, 50, 0],
+        }}
+        transition={{
+          duration: 20,
+          repeat: Infinity,
+          ease: "linear",
+        }}
+        className="absolute top-[-10%] left-[-10%] w-[70%] h-[70%] bg-indigo-500/15 rounded-full blur-[120px]"
+      />
+      <motion.div
+        animate={{
+          scale: [1, 1.3, 1],
+          x: [0, -80, 0],
+          y: [0, 120, 0],
+        }}
+        transition={{
+          duration: 25,
+          repeat: Infinity,
+          ease: "linear",
+        }}
+        className="absolute bottom-[-10%] right-[-10%] w-[80%] h-[80%] bg-purple-500/15 rounded-full blur-[120px]"
+      />
+
+      {/* Grid Pattern */}
+      <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 mix-blend-overlay"></div>
+      <div 
+        className="absolute inset-0" 
+        style={{ 
+          backgroundImage: `radial-gradient(circle at 2px 2px, rgba(79, 70, 229, 0.05) 1px, transparent 0)`,
+          backgroundSize: '40px 40px' 
+        }}
+      ></div>
+
+      {/* Neural Network / Data Flow SVG */}
+      <svg className="absolute inset-0 w-full h-full opacity-[0.15]">
+        <defs>
+          <filter id="glow">
+            <feGaussianBlur stdDeviation="2" result="coloredBlur" />
+            <feMerge>
+              <feMergeNode in="coloredBlur" />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
+          </filter>
+        </defs>
+        
+        {/* Animated Lines */}
+        {[...Array(20)].map((_, i) => (
+          <motion.line
+            key={`line-${i}`}
+            x1={`${Math.random() * 100}%`}
+            y1={`${Math.random() * 100}%`}
+            x2={`${Math.random() * 100}%`}
+            y2={`${Math.random() * 100}%`}
+            stroke="currentColor"
+            strokeWidth="1"
+            className="text-indigo-500"
+            initial={{ pathLength: 0, opacity: 0 }}
+            animate={{ 
+              pathLength: [0, 1, 0],
+              opacity: [0, 0.6, 0],
+            }}
+            transition={{
+              duration: 4 + Math.random() * 8,
+              repeat: Infinity,
+              delay: Math.random() * 5,
+            }}
+          />
+        ))}
+
+        {/* Pulsing Nodes */}
+        {[...Array(25)].map((_, i) => (
+          <motion.circle
+            key={`node-${i}`}
+            cx={`${Math.random() * 100}%`}
+            cy={`${Math.random() * 100}%`}
+            r={Math.random() * 4 + 2}
+            fill="currentColor"
+            className="text-indigo-600"
+            animate={{
+              opacity: [0.3, 0.9, 0.3],
+              scale: [1, 1.8, 1],
+            }}
+            transition={{
+              duration: 3 + Math.random() * 4,
+              repeat: Infinity,
+              delay: Math.random() * 3,
+            }}
+            filter="url(#glow)"
+          />
+        ))}
+      </svg>
+    </div>
+  );
+};
 
 export default function App() {
   const [step, setStep] = useState<'landing' | 'searching' | 'confirming' | 'dashboard'>('landing');
@@ -66,6 +170,7 @@ export default function App() {
   const [selectedCase, setSelectedCase] = useState<(SuccessCase & { details: string, path: string[] }) | null>(null);
   const [isEditingDesc, setIsEditingDesc] = useState(false);
   const [tempDesc, setTempDesc] = useState('');
+  const [dynamicRisks, setDynamicRisks] = useState<string[]>([]);
 
   const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || '' });
 
@@ -85,7 +190,8 @@ export default function App() {
           competitors: ["旷视科技", "依图科技", "云从科技", "海康威视"],
           fundingStatus: "已上市 (HKEX: 0020)",
           revenue: "约 38 亿人民币 (2023)",
-          employeeCount: "5000+"
+          employeeCount: "5000+",
+          industryChallenges: ["算力成本持续攀升", "数据隐私监管趋严", "大模型商业化落地路径尚不清晰", "高端人才竞争激烈"]
         });
         setStep('confirming');
       }, 1500);
@@ -105,7 +211,8 @@ export default function App() {
           "description": "企业简介",
           "keyTech": ["技术关键词1", "2"],
           "competitors": ["竞品1", "2"],
-          "fundingStatus": "当前融资状态"
+          "fundingStatus": "当前融资状态",
+          "industryChallenges": ["行业困境1", "行业困境2"]
         }`,
         config: { 
           responseMimeType: "application/json",
@@ -126,7 +233,8 @@ export default function App() {
         description: "一家专注于前沿技术研发的科创企业。",
         keyTech: ["人工智能", "大数据"],
         competitors: ["行业头部企业A", "创新公司B"],
-        fundingStatus: "天使轮"
+        fundingStatus: "天使轮",
+        industryChallenges: ["市场认知度低", "资金链紧张", "人才招聘困难"]
       });
       setStep('confirming');
     }
@@ -134,6 +242,24 @@ export default function App() {
 
   const startAnalysis = () => {
     setIsAnalyzing(true);
+    
+    // Generate some dynamic risks based on profile
+    if (profile) {
+      if (profile.name.includes('商汤')) {
+        setDynamicRisks([
+          "技术性失业与组织重构压力",
+          "核心算法被开源技术替代的风险",
+          "地缘政治导致的高端芯片断供风险"
+        ]);
+      } else {
+        setDynamicRisks([
+          `${profile.industry}领域准入门槛提高的政策风险`,
+          `核心技术${profile.keyTech[0]}被颠覆的风险`,
+          `与${profile.competitors[0]}等竞品的同质化竞争风险`
+        ]);
+      }
+    }
+
     setTimeout(() => {
       setStep('dashboard');
       setIsAnalyzing(false);
@@ -142,6 +268,7 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] text-slate-900 font-sans selection:bg-indigo-100">
+      {step === 'landing' && <BackgroundAI />}
       {/* Navigation */}
       <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-bottom border-slate-200 px-6 py-4 flex justify-between items-center">
         <div className="flex items-center gap-2">
@@ -161,16 +288,18 @@ export default function App() {
         </div>
       </nav>
 
-      <main className="max-w-7xl mx-auto px-6 py-12">
+      <main className="relative min-h-[80vh] max-w-7xl mx-auto px-6 py-12">
         <AnimatePresence mode="wait">
           {step === 'landing' && (
-            <motion.div 
-              key="landing"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              className="text-center max-w-3xl mx-auto py-20"
-            >
+            <div key="landing-container" className="relative w-full">
+              <motion.div 
+                key="landing"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                className="relative text-center max-w-3xl mx-auto py-20 z-10"
+              >
+                <div className="relative">
               <h1 className="text-5xl md:text-6xl font-extrabold tracking-tight mb-2 bg-gradient-to-r from-slate-900 via-indigo-900 to-slate-900 bg-clip-text text-transparent">
                 从“大水漫灌”到“精准滴灌”
               </h1>
@@ -220,8 +349,10 @@ export default function App() {
                   <div className="text-xs uppercase tracking-widest font-semibold">智能监控</div>
                 </div>
               </div>
-            </motion.div>
-          )}
+            </div>
+          </motion.div>
+        </div>
+      )}
 
           {step === 'searching' && (
             <motion.div 
@@ -477,7 +608,35 @@ export default function App() {
                         <XAxis dataKey="year" axisLine={false} tickLine={false} tick={{fill: '#94A3B8', fontSize: 12}} />
                         <YAxis hide />
                         <Tooltip 
-                          contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
+                          content={({ active, payload, label }) => {
+                            if (active && payload && payload.length) {
+                              const data = growthData.find(d => d.year === label);
+                              return (
+                                <div className="bg-white p-4 rounded-2xl shadow-2xl border border-slate-100 max-w-[240px]">
+                                  <div className="text-xs font-bold text-slate-400 mb-1 uppercase tracking-widest">{label} 年度预测</div>
+                                  <div className="text-lg font-bold text-indigo-600 mb-2">
+                                    {data?.milestone || '稳健增长期'}
+                                  </div>
+                                  {data?.potentialRisks && (
+                                    <div className="mt-2 pt-2 border-t border-slate-100">
+                                      <div className="text-[10px] font-bold text-amber-600 uppercase mb-1 flex items-center gap-1">
+                                        <AlertCircle size={10} /> 潜在困境/风险
+                                      </div>
+                                      <ul className="space-y-1">
+                                        {data.potentialRisks.map((risk, i) => (
+                                          <li key={i} className="text-[10px] text-slate-500 flex items-start gap-1">
+                                            <span className="mt-1 w-1 h-1 bg-amber-400 rounded-full shrink-0" />
+                                            {risk}
+                                          </li>
+                                        ))}
+                                      </ul>
+                                    </div>
+                                  )}
+                                </div>
+                              );
+                            }
+                            return null;
+                          }}
                         />
                         <Area type="monotone" dataKey="pred" stroke="#C7D2FE" fill="transparent" strokeWidth={2} strokeDasharray="5 5" />
                         <Area type="monotone" dataKey="value" stroke="#4F46E5" fillOpacity={1} fill="url(#colorValue)" strokeWidth={3} />
@@ -513,6 +672,38 @@ export default function App() {
                         ? "AI 深度分析：基于数百万企业案例库推演，商汤科技在通用大模型 SenseNova 的持续投入已进入产出期。未来 10 年，随着 AIDC 算力租赁的毛利贡献增加，企业将进入指数级增长阶段。"
                         : `AI 深度分析：基于数百万企业案例库推演，由于您在${profile.keyTech[0]}领域的持续投入，预计未来 10 年将迎来业务爆发期，建议提前储备人才与服务器资源。`}
                     </p>
+                  </div>
+
+                  {/* Industry & Enterprise Predicaments Section */}
+                  <div className="mt-8 grid md:grid-cols-2 gap-6">
+                    <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200">
+                      <h4 className="text-sm font-bold text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2">
+                        <Globe size={16} className="text-slate-400" />
+                        行业当前困境 (Industry Challenges)
+                      </h4>
+                      <div className="space-y-3">
+                        {profile.industryChallenges?.map((challenge, i) => (
+                          <div key={i} className="flex gap-3 items-start">
+                            <div className="mt-1.5 w-1.5 h-1.5 rounded-full bg-slate-300 shrink-0" />
+                            <p className="text-sm text-slate-600 leading-relaxed">{challenge}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="bg-amber-50/50 p-6 rounded-2xl border border-amber-100">
+                      <h4 className="text-sm font-bold text-amber-600 uppercase tracking-widest mb-4 flex items-center gap-2">
+                        <AlertCircle size={16} />
+                        企业潜在困境 (Future Risks)
+                      </h4>
+                      <div className="space-y-3">
+                        {dynamicRisks.map((risk, i) => (
+                          <div key={i} className="flex gap-3 items-start">
+                            <div className="mt-1.5 w-1.5 h-1.5 rounded-full bg-amber-400 shrink-0" />
+                            <p className="text-sm text-slate-700 font-medium">{risk}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
                   </div>
                 </div>
 
