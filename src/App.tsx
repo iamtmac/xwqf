@@ -38,6 +38,7 @@ import {
   AreaChart,
   Area,
   ReferenceDot,
+  ReferenceLine,
   Label
 } from 'recharts';
 import { GoogleGenAI } from "@google/genai";
@@ -47,14 +48,23 @@ import { EnterpriseProfile, GrowthMilestone, ServiceMatch, SuccessCase } from '.
 // --- Mock Data for Visualization (10-Year Trajectory) ---
 const growthData = [
   { year: '2024', value: 40, pred: 40, milestone: '申报科技型中小企业', potentialRisks: ['研发投入不足', '核心人才流失'] },
+  { year: '2024.5', value: 48, pred: 48 },
   { year: '2025', value: 55, pred: 55, milestone: '人员突破 100 人', potentialRisks: ['管理成本激增', '企业文化稀释'] },
+  { year: '2025.5', value: 64, pred: 64 },
   { year: '2026', value: 72, pred: 72, milestone: '申报高新技术企业', potentialRisks: ['知识产权纠纷', '技术迭代滞后'] },
+  { year: '2026.5', value: null, pred: 84 },
   { year: '2027', value: null, pred: 95, milestone: '申报专精特新“小巨人”', potentialRisks: ['市场竞争加剧', '供应链波动'] },
+  { year: '2027.5', value: null, pred: 112 },
   { year: '2028', value: null, pred: 130, milestone: '人员突破 500 人', potentialRisks: ['组织架构僵化', '现金流压力'] },
+  { year: '2028.5', value: null, pred: 155 },
   { year: '2029', value: null, pred: 180, milestone: '申报省级重点实验室', potentialRisks: ['科研成果转化难', '政策环境变化'] },
+  { year: '2029.5', value: null, pred: 220 },
   { year: '2030', value: null, pred: 260, milestone: '人员突破 1000 人', potentialRisks: ['全球化扩张阻力', '合规性风险'] },
+  { year: '2030.5', value: null, pred: 320 },
   { year: '2031', value: null, pred: 380, milestone: '申报国家级工程中心', potentialRisks: ['技术瓶颈突破难', '品牌声誉风险'] },
+  { year: '2031.5', value: null, pred: 450 },
   { year: '2032', value: null, pred: 520, milestone: '人员突破 2000 人', potentialRisks: ['大企业病', '市场饱和'] },
+  { year: '2032.5', value: null, pred: 610 },
   { year: '2033', value: null, pred: 700, milestone: '申报行业标准领跑者', potentialRisks: ['颠覆性技术冲击', '反垄断审查'] },
 ];
 
@@ -172,6 +182,17 @@ export default function App() {
   const [tempDesc, setTempDesc] = useState('');
   const [dynamicRisks, setDynamicRisks] = useState<string[]>([]);
   const [jiaxingCustomer, setJiaxingCustomer] = useState<{ name: string, reason: string } | null>(null);
+  const [roadmapTasks, setRoadmapTasks] = useState([
+    { id: 1, task: "完善 2025 年度研发费用归集", status: "completed", category: "财务" },
+    { id: 2, task: "提交 3 项核心发明专利申请", status: "in-progress", category: "技术" },
+    { id: 3, task: "完成高级算法工程师团队组建", status: "todo", category: "人才" },
+    { id: 4, task: "启动专精特新“小巨人”预申报", status: "todo", category: "政策" },
+  ]);
+  const [intelligence, setIntelligence] = useState([
+    { id: 1, type: 'policy', title: '嘉兴市 2026 年度首台套装备奖励申报启动', time: '10分钟前' },
+    { id: 2, type: 'competitor', title: '竞品“旷视科技”发布最新工业质检大模型', time: '2小时前' },
+    { id: 3, type: 'market', title: '长三角机器人产业集群专项资金公示', time: '5小时前' },
+  ]);
 
   const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || '' });
 
@@ -614,36 +635,62 @@ export default function App() {
                       <AreaChart data={growthData}>
                         <defs>
                           <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="#4F46E5" stopOpacity={0.1}/>
+                            <stop offset="5%" stopColor="#4F46E5" stopOpacity={0.3}/>
                             <stop offset="95%" stopColor="#4F46E5" stopOpacity={0}/>
+                          </linearGradient>
+                          <linearGradient id="colorPred" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="#C7D2FE" stopOpacity={0.2}/>
+                            <stop offset="95%" stopColor="#C7D2FE" stopOpacity={0}/>
                           </linearGradient>
                         </defs>
                         <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F1F5F9" />
-                        <XAxis dataKey="year" axisLine={false} tickLine={false} tick={{fill: '#94A3B8', fontSize: 12}} />
-                        <YAxis hide />
+                        <XAxis 
+                          dataKey="year" 
+                          axisLine={false} 
+                          tickLine={false} 
+                          tick={{fill: '#94A3B8', fontSize: 12}} 
+                          padding={{ left: 10, right: 10 }}
+                          ticks={['2024', '2025', '2026', '2027', '2028', '2029', '2030', '2031', '2032', '2033']}
+                        />
+                        <YAxis hide domain={[0, 'dataMax + 100']} />
                         <Tooltip 
+                          cursor={{ stroke: '#E2E8F0', strokeWidth: 2 }}
                           content={({ active, payload, label }) => {
                             if (active && payload && payload.length) {
                               const data = growthData.find(d => d.year === label);
+                              const isPrediction = data?.value === null;
                               return (
-                                <div className="bg-white p-4 rounded-2xl shadow-2xl border border-slate-100 max-w-[240px]">
-                                  <div className="text-xs font-bold text-slate-400 mb-1 uppercase tracking-widest">{label} 年度预测</div>
-                                  <div className="text-lg font-bold text-indigo-600 mb-2">
+                                <div className="bg-white/95 backdrop-blur-sm p-4 rounded-2xl shadow-2xl border border-slate-100 max-w-[260px] animate-in fade-in zoom-in duration-200">
+                                  <div className="flex justify-between items-center mb-2">
+                                    <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{label} 年度分析</div>
+                                    <div className={cn(
+                                      "text-[10px] px-2 py-0.5 rounded-full font-bold uppercase",
+                                      isPrediction ? "bg-indigo-100 text-indigo-600" : "bg-emerald-100 text-emerald-600"
+                                    )}>
+                                      {isPrediction ? "AI 预测" : "历史实绩"}
+                                    </div>
+                                  </div>
+                                  <div className="text-lg font-bold text-slate-900 mb-1">
                                     {data?.milestone || '稳健增长期'}
                                   </div>
+                                  <div className="text-2xl font-black text-indigo-600 mb-3">
+                                    {isPrediction ? data?.pred : data?.value}
+                                    <span className="text-xs font-medium text-slate-400 ml-1">成长指数</span>
+                                  </div>
+                                  
                                   {data?.potentialRisks && (
                                     <div className="mt-2 pt-2 border-t border-slate-100">
-                                      <div className="text-[10px] font-bold text-amber-600 uppercase mb-1 flex items-center gap-1">
-                                        <AlertCircle size={10} /> 潜在困境/风险
+                                      <div className="text-[10px] font-bold text-amber-600 uppercase mb-2 flex items-center gap-1">
+                                        <AlertCircle size={10} /> 潜在挑战与风险
                                       </div>
-                                      <ul className="space-y-1">
+                                      <div className="grid grid-cols-1 gap-1.5">
                                         {data.potentialRisks.map((risk, i) => (
-                                          <li key={i} className="text-[10px] text-slate-500 flex items-start gap-1">
+                                          <div key={i} className="text-[10px] text-slate-500 flex items-start gap-2 bg-slate-50 p-1.5 rounded-lg">
                                             <span className="mt-1 w-1 h-1 bg-amber-400 rounded-full shrink-0" />
                                             {risk}
-                                          </li>
+                                          </div>
                                         ))}
-                                      </ul>
+                                      </div>
                                     </div>
                                   )}
                                 </div>
@@ -652,8 +699,41 @@ export default function App() {
                             return null;
                           }}
                         />
-                        <Area type="monotone" dataKey="pred" stroke="#C7D2FE" fill="transparent" strokeWidth={2} strokeDasharray="5 5" />
-                        <Area type="monotone" dataKey="value" stroke="#4F46E5" fillOpacity={1} fill="url(#colorValue)" strokeWidth={3} />
+                        <Area 
+                          type="monotone" 
+                          dataKey="pred" 
+                          stroke="#C7D2FE" 
+                          fill="url(#colorPred)" 
+                          strokeWidth={2} 
+                          strokeDasharray="5 5" 
+                          animationDuration={2000}
+                        />
+                        <Area 
+                          type="monotone" 
+                          dataKey="value" 
+                          stroke="#4F46E5" 
+                          fillOpacity={1} 
+                          fill="url(#colorValue)" 
+                          strokeWidth={4}
+                          activeDot={{ r: 6, strokeWidth: 0, fill: '#4F46E5' }}
+                          animationDuration={1500}
+                        />
+                        
+                        {/* Present Day Reference Line */}
+                        <ReferenceLine 
+                          x="2026" 
+                          stroke="#4F46E5" 
+                          strokeDasharray="3 3" 
+                          strokeWidth={2}
+                          label={{ 
+                            value: '当前节点', 
+                            position: 'top', 
+                            fill: '#4F46E5', 
+                            fontSize: 12, 
+                            fontWeight: 'bold',
+                            dy: -10
+                          }} 
+                        />
                         
                         {/* Milestones Markers */}
                         {growthData.map((entry, index) => (
@@ -670,8 +750,12 @@ export default function App() {
                               <Label
                                 value={entry.milestone}
                                 position="top"
-                                offset={10}
-                                style={{ fill: '#4338CA', fontSize: '10px', fontWeight: '600' }}
+                                offset={12}
+                                style={{ 
+                                  fill: '#4338CA', 
+                                  fontSize: '11px', 
+                                  fontWeight: '700'
+                                }}
                               />
                             </ReferenceDot>
                           )
@@ -686,6 +770,67 @@ export default function App() {
                         ? "AI 深度分析：基于数百万企业案例库推演，商汤科技在通用大模型 SenseNova 的持续投入已进入产出期。未来 10 年，随着 AIDC 算力租赁的毛利贡献增加，企业将进入指数级增长阶段。"
                         : `AI 深度分析：基于数百万企业案例库推演，由于您在${profile.keyTech[0]}领域的持续投入，预计未来 10 年将迎来业务爆发期，建议提前储备人才与服务器资源。`}
                     </p>
+                  </div>
+                  <div className="mt-4 flex items-center gap-4 text-[10px] text-slate-400">
+                    <div className="flex items-center gap-1">
+                      <div className="w-2 h-2 rounded-full bg-indigo-600"></div>
+                      <span>实绩曲线</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <div className="w-2 h-2 rounded-full bg-indigo-300 border border-dashed border-indigo-400"></div>
+                      <span>AI 预测路径</span>
+                    </div>
+                    <div className="ml-auto italic">* 成长指数基于营收、人才规模及政策匹配度综合计算</div>
+                  </div>
+
+                  {/* Growth Roadmap - NEW STICKINESS FEATURE */}
+                  <div className="mt-10">
+                    <div className="flex justify-between items-end mb-6">
+                      <div>
+                        <h4 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+                          <CheckCircle2 className="text-emerald-500" size={20} />
+                          企业成长路线图
+                        </h4>
+                        <p className="text-xs text-slate-500">基于 AI 预测为您定制的行动清单，完成度越高，预测准确率越高</p>
+                      </div>
+                      <div className="text-right">
+                        <span className="text-2xl font-black text-indigo-600">25%</span>
+                        <span className="text-[10px] font-bold text-slate-400 block uppercase">当前完成度</span>
+                      </div>
+                    </div>
+                    <div className="grid md:grid-cols-2 gap-4">
+                      {roadmapTasks.map((task) => (
+                        <div 
+                          key={task.id}
+                          className={cn(
+                            "p-4 rounded-2xl border transition-all cursor-pointer flex items-center gap-3",
+                            task.status === 'completed' ? "bg-emerald-50 border-emerald-100" : 
+                            task.status === 'in-progress' ? "bg-indigo-50 border-indigo-100 ring-2 ring-indigo-600/20" :
+                            "bg-white border-slate-200 hover:border-indigo-300"
+                          )}
+                        >
+                          <div className={cn(
+                            "w-6 h-6 rounded-full flex items-center justify-center shrink-0",
+                            task.status === 'completed' ? "bg-emerald-500 text-white" : 
+                            task.status === 'in-progress' ? "bg-indigo-600 text-white animate-pulse" :
+                            "border-2 border-slate-200 text-slate-200"
+                          )}>
+                            {task.status === 'completed' ? <CheckCircle2 size={14} /> : <div className="w-1.5 h-1.5 rounded-full bg-current" />}
+                          </div>
+                          <div className="flex-1">
+                            <div className="flex justify-between items-start">
+                              <span className={cn("text-sm font-bold", task.status === 'completed' ? "text-emerald-900" : "text-slate-700")}>
+                                {task.task}
+                              </span>
+                              <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-100 text-slate-500 font-medium">{task.category}</span>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                      <button className="p-4 rounded-2xl border border-dashed border-slate-300 text-slate-400 text-sm font-medium hover:border-indigo-400 hover:text-indigo-600 transition-all flex items-center justify-center gap-2">
+                        <Plus size={16} /> 添加自定义任务
+                      </button>
+                    </div>
                   </div>
 
                   {/* Industry & Enterprise Predicaments Section */}
@@ -736,13 +881,24 @@ export default function App() {
                       <div className="text-lg font-bold">高级算法工程师 (3名)</div>
                       <p className="text-xs text-slate-500 mt-1">匹配小湾人才库，已锁定 12 名候选人</p>
                     </div>
-                    <div className="p-4 bg-white/5 rounded-2xl border border-white/10">
+                    <div className="p-4 bg-white/5 rounded-2xl border border-white/10 relative overflow-hidden group">
                       <div className="flex justify-between items-center mb-2">
                         <span className="text-sm font-medium text-slate-400">政策匹配</span>
                         <span className="text-xs bg-emerald-500 px-2 py-0.5 rounded">可申请</span>
                       </div>
                       <div className="text-lg font-bold">高新技术企业认定</div>
                       <p className="text-xs text-slate-500 mt-1">预计可减免税收 ¥200k/年</p>
+                      
+                      {/* Pro Overlay for deeper insight */}
+                      <div className="absolute inset-0 bg-slate-900/80 backdrop-blur-[2px] flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                         <div className="flex items-center gap-1 text-amber-400 mb-2">
+                           <Sparkles size={14} />
+                           <span className="text-[10px] font-bold uppercase tracking-tighter">Pro 专属深度分析</span>
+                         </div>
+                         <button className="px-3 py-1 bg-indigo-600 text-white text-[10px] font-bold rounded-full hover:bg-indigo-700">
+                           查看申报成功率
+                         </button>
+                      </div>
                     </div>
                     <div className="p-4 bg-white/5 rounded-2xl border border-white/10">
                       <div className="flex justify-between items-center mb-2">
@@ -782,11 +938,65 @@ export default function App() {
                     </div>
                   </div>
                 </div>
+                </div>
 
                 {/* Integrated Services */}
-                <div className="lg:col-span-3 grid md:grid-cols-2 xl:grid-cols-4 gap-8">
-                  {/* Policy Matching */}
-                  <div className="bg-white p-6 rounded-3xl border border-slate-200 hover:shadow-lg transition-all group">
+                <div className="lg:col-span-3 mt-12">
+                  <div className="flex justify-between items-center mb-8">
+                    <h3 className="text-xl font-bold flex items-center gap-2">
+                      <Briefcase className="text-indigo-600" size={24} />
+                      全生命周期集成服务
+                    </h3>
+                    <div className="bg-amber-50 border border-amber-200 px-4 py-2 rounded-2xl flex items-center gap-3">
+                      <div className="flex items-center gap-1 text-amber-700 font-bold text-sm">
+                        <Sparkles size={16} />
+                        升级 Pro 会员
+                      </div>
+                      <div className="h-4 w-px bg-amber-200"></div>
+                      <p className="text-xs text-amber-600">解锁深度竞品分析与政策申报绿色通道</p>
+                      <button className="bg-amber-600 text-white px-3 py-1 rounded-lg text-[10px] font-bold hover:bg-amber-700 transition-colors">
+                        立即升级
+                      </button>
+                    </div>
+                  </div>
+                  
+                  <div className="grid md:grid-cols-2 xl:grid-cols-4 gap-8">
+                    {/* Market Intelligence Feed - NEW STICKINESS FEATURE */}
+                    <div className="bg-slate-900 rounded-3xl p-6 border border-white/10 flex flex-col">
+                      <div className="flex items-center justify-between mb-4">
+                        <h4 className="text-sm font-bold text-white flex items-center gap-2">
+                          <Globe size={16} className="text-indigo-400" />
+                          实时情报流
+                        </h4>
+                        <span className="flex h-2 w-2 rounded-full bg-red-500 animate-ping"></span>
+                      </div>
+                      <div className="space-y-4 flex-1">
+                        {intelligence.map(item => (
+                          <div key={item.id} className="group cursor-pointer">
+                            <div className="flex justify-between items-start mb-1">
+                              <span className={cn(
+                                "text-[9px] font-bold px-1.5 py-0.5 rounded uppercase",
+                                item.type === 'policy' ? "bg-emerald-500/20 text-emerald-400" :
+                                item.type === 'competitor' ? "bg-red-500/20 text-red-400" :
+                                "bg-blue-500/20 text-blue-400"
+                              )}>
+                                {item.type}
+                              </span>
+                              <span className="text-[9px] text-slate-500">{item.time}</span>
+                            </div>
+                            <p className="text-xs text-slate-300 group-hover:text-white transition-colors line-clamp-2">
+                              {item.title}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                      <button className="mt-4 w-full py-2 border border-white/10 rounded-xl text-[10px] font-bold text-slate-400 hover:bg-white/5 transition-all">
+                        查看全部情报
+                      </button>
+                    </div>
+
+                    {/* Policy Matching */}
+                    <div className="bg-white p-6 rounded-3xl border border-slate-200 hover:shadow-lg transition-all group">
                     <div className="w-12 h-12 bg-orange-100 text-orange-600 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                       <FileText size={24} />
                     </div>
