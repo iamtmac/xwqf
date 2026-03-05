@@ -764,6 +764,22 @@ export default function App() {
                         </p>
                       </div>
                     )}
+
+                    {/* Join Us Card */}
+                    <div className="mt-8 p-6 bg-gradient-to-br from-indigo-600/20 to-purple-600/20 rounded-2xl border border-indigo-500/30 border-dashed group cursor-pointer hover:bg-indigo-600/30 transition-all">
+                      <div className="flex items-center gap-3 mb-3">
+                        <div className="w-10 h-10 rounded-full bg-indigo-600 flex items-center justify-center text-white group-hover:scale-110 transition-transform">
+                          <Users size={20} />
+                        </div>
+                        <h4 className="font-bold text-indigo-100">加入小湾生态圈</h4>
+                      </div>
+                      <p className="text-xs text-slate-400 leading-relaxed mb-4">
+                        加入我们，您的企业也将作为优质要素，出现在其他合适企业的智能匹配推荐中。同时，我们将为您<span className="text-indigo-300 font-bold">持续推送潜在商机</span>，实现生态共赢。
+                      </p>
+                      <button className="w-full py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold transition-colors">
+                        立即入驻
+                      </button>
+                    </div>
                   </div>
                 </div>
 
