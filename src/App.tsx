@@ -32,21 +32,26 @@ import {
   Tooltip, 
   ResponsiveContainer,
   AreaChart,
-  Area
+  Area,
+  ReferenceDot,
+  Label
 } from 'recharts';
 import { GoogleGenAI } from "@google/genai";
 import { cn } from './lib/utils';
 import { EnterpriseProfile, GrowthMilestone, ServiceMatch, SuccessCase } from './types';
 
-// --- Mock Data for Visualization ---
+// --- Mock Data for Visualization (10-Year Trajectory) ---
 const growthData = [
-  { month: '1月', value: 40, pred: 40 },
-  { month: '2月', value: 45, pred: 45 },
-  { month: '3月', value: 55, pred: 55 },
-  { month: '4月', value: 62, pred: 62 },
-  { month: '5月', value: null, pred: 75 },
-  { month: '6月', value: null, pred: 90 },
-  { month: '7月', value: null, pred: 110 },
+  { year: '2024', value: 40, pred: 40, milestone: '申报科技型中小企业' },
+  { year: '2025', value: 55, pred: 55, milestone: '人员突破 100 人' },
+  { year: '2026', value: 72, pred: 72, milestone: '申报高新技术企业' },
+  { year: '2027', value: null, pred: 95, milestone: '申报专精特新“小巨人”' },
+  { year: '2028', value: null, pred: 130, milestone: '人员突破 500 人' },
+  { year: '2029', value: null, pred: 180, milestone: '申报省级重点实验室' },
+  { year: '2030', value: null, pred: 260, milestone: '人员突破 1000 人' },
+  { year: '2031', value: null, pred: 380, milestone: '申报国家级工程中心' },
+  { year: '2032', value: null, pred: 520, milestone: '人员突破 2000 人' },
+  { year: '2033', value: null, pred: 700, milestone: '申报行业标准领跑者' },
 ];
 
 export default function App() {
@@ -356,7 +361,7 @@ export default function App() {
               <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
                   <h1 className="text-3xl font-bold">{profile.name} · 成长导航</h1>
-                  <p className="text-slate-500">基于 AI 预测的未来 12 个月发展路线图</p>
+                  <p className="text-slate-500">基于数百万企业发展案例库 AI 推演的未来 10 年发展轨迹</p>
                 </div>
                 <div className="flex gap-3">
                   <button className="bg-white border border-slate-200 px-4 py-2 rounded-xl text-sm font-semibold hover:bg-slate-50 transition-all flex items-center gap-2">
@@ -398,13 +403,35 @@ export default function App() {
                           </linearGradient>
                         </defs>
                         <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F1F5F9" />
-                        <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{fill: '#94A3B8', fontSize: 12}} />
+                        <XAxis dataKey="year" axisLine={false} tickLine={false} tick={{fill: '#94A3B8', fontSize: 12}} />
                         <YAxis hide />
                         <Tooltip 
                           contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
                         />
                         <Area type="monotone" dataKey="pred" stroke="#C7D2FE" fill="transparent" strokeWidth={2} strokeDasharray="5 5" />
                         <Area type="monotone" dataKey="value" stroke="#4F46E5" fillOpacity={1} fill="url(#colorValue)" strokeWidth={3} />
+                        
+                        {/* Milestones Markers */}
+                        {growthData.map((entry, index) => (
+                          entry.milestone && (index % 2 === 0 || entry.year === '2027') && (
+                            <ReferenceDot
+                              key={index}
+                              x={entry.year}
+                              y={entry.pred}
+                              r={5}
+                              fill="#4F46E5"
+                              stroke="#fff"
+                              strokeWidth={2}
+                            >
+                              <Label
+                                value={entry.milestone}
+                                position="top"
+                                offset={10}
+                                style={{ fill: '#4338CA', fontSize: '10px', fontWeight: '600' }}
+                              />
+                            </ReferenceDot>
+                          )
+                        ))}
                       </AreaChart>
                     </ResponsiveContainer>
                   </div>
@@ -412,8 +439,8 @@ export default function App() {
                     <Sparkles className="text-indigo-600 shrink-0" size={20} />
                     <p className="text-sm text-indigo-900">
                       {profile.name.includes('商汤') 
-                        ? "AI 深度分析：商汤科技在通用大模型 SenseNova 的持续投入已进入产出期，预计下半年智慧城市业务将触底反弹，建议关注 AIDC 算力租赁的毛利贡献。"
-                        : `预测显示：由于您在${profile.keyTech[0]}领域的持续投入，预计 6 月份将迎来业务爆发期，建议提前储备人才与服务器资源。`}
+                        ? "AI 深度分析：基于数百万企业案例库推演，商汤科技在通用大模型 SenseNova 的持续投入已进入产出期。未来 10 年，随着 AIDC 算力租赁的毛利贡献增加，企业将进入指数级增长阶段。"
+                        : `AI 深度分析：基于数百万企业案例库推演，由于您在${profile.keyTech[0]}领域的持续投入，预计未来 10 年将迎来业务爆发期，建议提前储备人才与服务器资源。`}
                     </p>
                   </div>
                 </div>
