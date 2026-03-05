@@ -28,7 +28,7 @@ export interface SuccessCase {
 }
 
 export interface ServiceMatch {
-  type: 'fund' | 'financing' | 'security' | 'consulting';
+  type: 'fund' | 'financing' | 'security' | 'consulting' | 'policy';
   title: string;
   description: string;
   matchScore: number;

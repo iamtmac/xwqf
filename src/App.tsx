@@ -20,7 +20,8 @@ import {
   Briefcase,
   ArrowRight,
   Loader2,
-  Sparkles
+  Sparkles,
+  FileText
 } from 'lucide-react';
 import { 
   LineChart, 
@@ -139,6 +140,7 @@ export default function App() {
           <span className="font-bold text-xl tracking-tight">小湾企服 <span className="text-indigo-600">Pro</span></span>
         </div>
         <div className="hidden md:flex items-center gap-6 text-sm font-medium text-slate-600">
+          <a href="#" className="hover:text-indigo-600 transition-colors">智能政策</a>
           <a href="#" className="hover:text-indigo-600 transition-colors">智能基金</a>
           <a href="#" className="hover:text-indigo-600 transition-colors">融资服务</a>
           <a href="#" className="hover:text-indigo-600 transition-colors">数据安全</a>
@@ -451,7 +453,23 @@ export default function App() {
                 </div>
 
                 {/* Integrated Services */}
-                <div className="lg:col-span-3 grid md:grid-cols-3 gap-8">
+                <div className="lg:col-span-3 grid md:grid-cols-2 xl:grid-cols-4 gap-8">
+                  {/* Policy Matching */}
+                  <div className="bg-white p-6 rounded-3xl border border-slate-200 hover:shadow-lg transition-all group">
+                    <div className="w-12 h-12 bg-orange-100 text-orange-600 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                      <FileText size={24} />
+                    </div>
+                    <h4 className="text-lg font-bold mb-2">智能政策匹配</h4>
+                    <p className="text-sm text-slate-500 mb-4">
+                      {profile.name.includes('商汤') 
+                        ? "已匹配 5 项国家级人工智能专项补贴，预计可获支持资金 ¥12M+。" 
+                        : "已为您匹配 4 项省级科技创新专项补贴，平均匹配度 88%。"}
+                    </p>
+                    <button className="text-orange-600 text-sm font-bold flex items-center gap-1 hover:gap-2 transition-all">
+                      查看政策详情 <ChevronRight size={16} />
+                    </button>
+                  </div>
+
                   {/* Smart Fund */}
                   <div className="bg-white p-6 rounded-3xl border border-slate-200 hover:shadow-lg transition-all group">
                     <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
@@ -619,6 +637,10 @@ export default function App() {
         <div className="flex flex-col items-center gap-1 text-slate-400">
           <BarChart3 size={20} />
           <span className="text-[10px] font-bold">规划</span>
+        </div>
+        <div className="flex flex-col items-center gap-1 text-slate-400">
+          <FileText size={20} />
+          <span className="text-[10px] font-bold">政策</span>
         </div>
         <div className="flex flex-col items-center gap-1 text-slate-400">
           <ShieldCheck size={20} />
