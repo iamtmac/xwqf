@@ -194,6 +194,16 @@ export default function App() {
     { id: 3, type: 'market', title: '长三角机器人产业集群专项资金公示', time: '5小时前' },
   ]);
 
+  const toggleTask = (id: number) => {
+    setRoadmapTasks(prev => prev.map(t => {
+      if (t.id === id) {
+        const nextStatus = t.status === 'completed' ? 'todo' : t.status === 'todo' ? 'in-progress' : 'completed';
+        return { ...t, status: nextStatus };
+      }
+      return t;
+    }));
+  };
+
   const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || '' });
 
   const handleSearch = async () => {
@@ -601,8 +611,9 @@ export default function App() {
                   </div>
                 </div>
                 <div className="flex gap-3">
-                  <button className="bg-white border border-slate-200 px-4 py-2 rounded-xl text-sm font-semibold hover:bg-slate-50 transition-all flex items-center gap-2">
+                  <button className="bg-white border border-slate-200 px-4 py-2 rounded-xl text-sm font-semibold hover:bg-slate-50 transition-all flex items-center gap-2 relative group">
                     导出报告
+                    <div className="absolute -top-2 -right-2 bg-amber-500 text-white text-[8px] px-1.5 py-0.5 rounded-full font-bold opacity-0 group-hover:opacity-100 transition-opacity">PRO</div>
                   </button>
                   <button className="bg-indigo-600 text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-indigo-700 transition-all flex items-center gap-2">
                     联系专属顾问
@@ -802,6 +813,7 @@ export default function App() {
                       {roadmapTasks.map((task) => (
                         <div 
                           key={task.id}
+                          onClick={() => toggleTask(task.id)}
                           className={cn(
                             "p-4 rounded-2xl border transition-all cursor-pointer flex items-center gap-3",
                             task.status === 'completed' ? "bg-emerald-50 border-emerald-100" : 
@@ -1020,6 +1032,29 @@ export default function App() {
                     <p className="text-sm text-slate-500 mb-4">已为您匹配 3 支政府引导基金，平均匹配度 92%。</p>
                     <button className="text-blue-600 text-sm font-bold flex items-center gap-1 hover:gap-2 transition-all">
                       查看匹配详情 <ChevronRight size={16} />
+                    </button>
+                  </div>
+
+                  {/* Competitor Intelligence - NEW MONETIZATION FEATURE */}
+                  <div className="bg-white p-6 rounded-3xl border border-slate-200 hover:shadow-lg transition-all group relative overflow-hidden">
+                    <div className="w-12 h-12 bg-red-100 text-red-600 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                      <TrendingUp size={24} />
+                    </div>
+                    <h4 className="text-lg font-bold mb-2">深度竞品分析</h4>
+                    <p className="text-sm text-slate-500 mb-4">监控 3 家核心竞品的人才流向与专利布局动态。</p>
+                    
+                    {/* Pro Lock Overlay */}
+                    <div className="absolute inset-0 bg-white/60 backdrop-blur-sm flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                      <div className="bg-slate-900 text-white p-4 rounded-2xl shadow-xl flex flex-col items-center text-center max-w-[80%]">
+                        <ShieldCheck className="text-amber-400 mb-2" size={32} />
+                        <div className="text-xs font-bold mb-1">PRO 专属功能</div>
+                        <p className="text-[10px] text-slate-400 mb-3">解锁竞品融资细节与核心技术拆解</p>
+                        <button className="w-full py-2 bg-indigo-600 rounded-lg text-[10px] font-bold">立即升级解锁</button>
+                      </div>
+                    </div>
+                    
+                    <button className="text-red-600 text-sm font-bold flex items-center gap-1">
+                      查看简版分析 <ChevronRight size={16} />
                     </button>
                   </div>
 
