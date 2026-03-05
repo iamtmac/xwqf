@@ -21,7 +21,11 @@ import {
   ArrowRight,
   Loader2,
   Sparkles,
-  FileText
+  FileText,
+  ArrowLeft,
+  Edit3,
+  Upload,
+  Plus
 } from 'lucide-react';
 import { 
   LineChart, 
@@ -60,6 +64,8 @@ export default function App() {
   const [profile, setProfile] = useState<EnterpriseProfile | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [selectedCase, setSelectedCase] = useState<(SuccessCase & { details: string, path: string[] }) | null>(null);
+  const [isEditingDesc, setIsEditingDesc] = useState(false);
+  const [tempDesc, setTempDesc] = useState('');
 
   const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || '' });
 
@@ -222,6 +228,12 @@ export default function App() {
               exit={{ opacity: 0 }}
               className="flex flex-col items-center justify-center py-40"
             >
+              <button 
+                onClick={() => setStep('landing')}
+                className="mb-8 flex items-center gap-2 text-slate-400 hover:text-indigo-600 transition-colors"
+              >
+                <ArrowLeft size={18} /> 返回重新搜索
+              </button>
               <div className="relative">
                 <div className="w-24 h-24 border-4 border-indigo-100 border-t-indigo-600 rounded-full animate-spin"></div>
                 <div className="absolute inset-0 flex items-center justify-center text-indigo-600">
@@ -240,6 +252,12 @@ export default function App() {
               animate={{ opacity: 1, scale: 1 }}
               className="max-w-4xl mx-auto"
             >
+              <button 
+                onClick={() => setStep('landing')}
+                className="mb-6 flex items-center gap-2 text-slate-500 hover:text-indigo-600 transition-colors font-medium"
+              >
+                <ArrowLeft size={18} /> 返回重新搜索
+              </button>
               <div className="bg-white rounded-3xl shadow-2xl border border-slate-200 overflow-hidden">
                 <div className="bg-indigo-600 p-8 text-white">
                   <div className="flex justify-between items-start">
@@ -262,10 +280,33 @@ export default function App() {
                 
                 <div className="p-8 grid md:grid-cols-2 gap-12">
                   <div>
-                    <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4">企业画像核实</h3>
-                    <p className="text-slate-700 leading-relaxed mb-6">
-                      {profile.description}
-                    </p>
+                    <div className="flex justify-between items-center mb-4">
+                      <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider">企业画像核实</h3>
+                      <button 
+                        onClick={() => {
+                          if (isEditingDesc) {
+                            setProfile(prev => prev ? { ...prev, description: tempDesc } : null);
+                          } else {
+                            setTempDesc(profile.description);
+                          }
+                          setIsEditingDesc(!isEditingDesc);
+                        }}
+                        className="text-indigo-600 text-xs font-bold flex items-center gap-1 hover:underline"
+                      >
+                        {isEditingDesc ? <><CheckCircle2 size={14} /> 保存修改</> : <><Edit3 size={14} /> 修改信息</>}
+                      </button>
+                    </div>
+                    {isEditingDesc ? (
+                      <textarea 
+                        value={tempDesc}
+                        onChange={(e) => setTempDesc(e.target.value)}
+                        className="w-full h-32 p-4 bg-slate-50 border border-indigo-200 rounded-2xl text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 mb-6"
+                      />
+                    ) : (
+                      <p className="text-slate-700 leading-relaxed mb-6">
+                        {profile.description}
+                      </p>
+                    )}
                     
                     <div className="space-y-4">
                       <div className="grid grid-cols-2 gap-4 mb-4">
@@ -300,6 +341,24 @@ export default function App() {
                               {comp}
                             </span>
                           ))}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="mt-10 pt-8 border-t border-slate-100">
+                      <h4 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4">补充材料与介绍</h4>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="border-2 border-dashed border-slate-200 rounded-2xl p-4 flex flex-col items-center justify-center gap-2 hover:border-indigo-300 hover:bg-indigo-50/30 transition-all cursor-pointer group">
+                          <div className="w-10 h-10 bg-slate-100 rounded-full flex items-center justify-center group-hover:bg-indigo-100 transition-colors">
+                            <Upload size={18} className="text-slate-400 group-hover:text-indigo-600" />
+                          </div>
+                          <span className="text-xs font-bold text-slate-500 group-hover:text-indigo-600">上传商业计划书</span>
+                        </div>
+                        <div className="border-2 border-dashed border-slate-200 rounded-2xl p-4 flex flex-col items-center justify-center gap-2 hover:border-indigo-300 hover:bg-indigo-50/30 transition-all cursor-pointer group">
+                          <div className="w-10 h-10 bg-slate-100 rounded-full flex items-center justify-center group-hover:bg-indigo-100 transition-colors">
+                            <Plus size={18} className="text-slate-400 group-hover:text-indigo-600" />
+                          </div>
+                          <span className="text-xs font-bold text-slate-500 group-hover:text-indigo-600">添加更多介绍</span>
                         </div>
                       </div>
                     </div>
@@ -359,9 +418,18 @@ export default function App() {
               className="space-y-8"
             >
               <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                <div>
-                  <h1 className="text-3xl font-bold">{profile.name} · 成长导航</h1>
-                  <p className="text-slate-500">基于数百万企业发展案例库 AI 推演的未来 10 年发展轨迹</p>
+                <div className="flex items-center gap-4">
+                  <button 
+                    onClick={() => setStep('confirming')}
+                    className="p-3 bg-white border border-slate-200 rounded-2xl text-slate-400 hover:text-indigo-600 hover:border-indigo-200 transition-all shadow-sm"
+                    title="返回核实界面"
+                  >
+                    <ArrowLeft size={20} />
+                  </button>
+                  <div>
+                    <h1 className="text-3xl font-bold">{profile.name} · 成长导航</h1>
+                    <p className="text-slate-500">基于数百万企业发展案例库 AI 推演的未来 10 年发展轨迹</p>
+                  </div>
                 </div>
                 <div className="flex gap-3">
                   <button className="bg-white border border-slate-200 px-4 py-2 rounded-xl text-sm font-semibold hover:bg-slate-50 transition-all flex items-center gap-2">
