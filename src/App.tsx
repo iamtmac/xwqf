@@ -201,7 +201,7 @@ export default function App() {
     { id: 3, type: 'market', title: '长三角机器人产业集群专项资金公示', time: '5小时前' },
   ]);
 
-  const [jiaxingOpportunities] = useState([
+  const [jiaxingOpportunities, setJiaxingOpportunities] = useState([
     { id: 1, industry: '新能源汽车', type: '供应链对接', title: '寻找年产 5000 吨级高纯度铝箔供应商', company: '某嘉兴百强汽配企业', time: '2小时前' },
     { id: 2, industry: '集成电路', type: '融资需求', title: 'A 轮融资 5000 万，投后估值 3 亿', company: '某南湖区高新芯片设计企业', time: '5小时前' },
     { id: 3, industry: '生物医药', type: '人才猎聘', title: '急聘首席科学家（年薪 150w+）', company: '某秀洲区生物医药研发平台', time: '1天前' },
@@ -221,29 +221,115 @@ export default function App() {
   const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || '' });
 
   const handleSearch = async () => {
-    if (!companyName) return;
+    const query = companyName.trim();
+    if (!query) return;
     
-    // Check if it's a question or a company name
-    const isQuestion = companyName.length > 10 || companyName.includes('?') || companyName.includes('？') || companyName.includes('如何') || companyName.includes('怎么');
-    
-    if (isQuestion) {
-      setIsChatting(true);
+    // 1. Priority: Special handling for 浙江金数湾科技有限公司
+    if (query.includes('浙江金数湾') || query.includes('金数湾')) {
+      setStep('searching');
       try {
         const response = await ai.models.generateContent({
           model: "gemini-3-flash-preview",
-          contents: `你是一个专业的企业经营顾问。请回答关于企业经营的问题："${companyName}"。
+          contents: `你是一个专业的企业咨询顾问。请联网搜索并深入分析"浙江金数湾科技有限公司"。
+          这家公司位于嘉兴，主要从事大数据和人工智能业务。
+          请提供：
+          1. 企业画像（名称、行业、阶段、简介、核心技术、竞品、融资状态、营收估算、员工规模、行业挑战）
+          2. 成长预测（未来3-5年的发展趋势预测）
+          3. 要素匹配（匹配嘉兴本地的政策、基金、人才、安全方案）
+          
+          返回JSON格式：
+          {
+            "name": "浙江金数湾科技有限公司",
+            "industry": "大数据/人工智能",
+            "stage": "成长期",
+            "description": "...",
+            "keyTech": ["...", "..."],
+            "competitors": ["...", "..."],
+            "fundingStatus": "...",
+            "revenue": "...",
+            "employeeCount": "...",
+            "industryChallenges": ["...", "..."],
+            "growthPrediction": "未来3-5年预测内容...",
+            "matchedElements": {
+              "policies": ["政策1", "政策2"],
+              "funds": ["基金1", "基金2"],
+              "talents": ["人才需求1", "人才需求2"],
+              "security": ["安全方案1"]
+            }
+          }`,
+          config: { 
+            responseMimeType: "application/json",
+            tools: [{ googleSearch: {} }] 
+          }
+        });
+        
+        const text = response.text;
+        if (!text) throw new Error("Empty response from AI");
+        
+        const data = JSON.parse(text);
+        setProfile(data);
+        
+        setJiaxingOpportunities([
+          { id: 101, industry: '大数据', type: '技术合作', title: '寻找具备大规模分布式存储经验的合作伙伴', company: '某嘉兴政务云服务商', time: '刚刚' },
+          { id: 102, industry: '人工智能', type: '场景对接', title: '智慧城市视觉识别算法采购需求', company: '嘉兴市某区城管局', time: '10分钟前' },
+          { id: 103, industry: '数字经济', type: '政策申报', title: '2026年度嘉兴市数字化转型标杆企业奖励公示', company: '嘉兴市经信局', time: '1小时前' },
+          { id: 104, industry: '算力服务', type: '资源对接', title: '寻求 500P 算力租赁长期合作伙伴', company: '某长三角算力中心', time: '3小时前' },
+        ]);
+
+        setStep('confirming');
+        return;
+      } catch (error) {
+        console.error("Special search failed, using fallback:", error);
+        // Fallback for Jinshuwan if API fails
+        setProfile({
+          name: "浙江金数湾科技有限公司",
+          industry: "大数据/人工智能",
+          stage: "成长期",
+          description: "浙江金数湾科技有限公司（简称“金数湾”）是一家专注于大数据处理、人工智能算法研发及算力服务的高新技术企业。公司立足嘉兴，深度参与长三角一体化数字经济建设，致力于为政府及企业提供全栈式数字化转型解决方案。",
+          keyTech: ["分布式存储架构", "多模态大模型调度", "隐私计算技术"],
+          competitors: ["阿里云", "腾讯云", "商汤科技"],
+          fundingStatus: "B轮融资中",
+          revenue: "约 1.2 亿人民币 (2025)",
+          employeeCount: "200-500人",
+          industryChallenges: ["算力资源成本波动", "数据合规性监管加强"],
+          growthPrediction: "预计未来3年将成为长三角地区领先的算力调度平台，营收规模有望突破5亿元，并启动科创板上市计划。",
+          matchedElements: {
+            "policies": ["嘉兴市数字经济核心产业奖励", "浙江省专精特新中小企业补贴"],
+            "funds": ["嘉兴南湖基金", "长三角数字经济产业基金"],
+            "talents": ["资深算法架构师", "大数据安全专家"],
+            "security": ["数据全生命周期加密方案"]
+          }
+        });
+        setStep('confirming');
+        return;
+      }
+    }
+
+    // 2. Check if it's a question
+    const isQuestion = query.includes('?') || query.includes('？') || 
+                      query.includes('如何') || query.includes('怎么') || 
+                      query.includes('什么') || query.includes('为什么');
+    
+    if (isQuestion) {
+      setIsChatting(true);
+      setChatResponse(null);
+      try {
+        const response = await ai.models.generateContent({
+          model: "gemini-3-flash-preview",
+          contents: `你是一个专业的企业经营顾问。请回答关于企业经营的问题："${query}"。
           请提供专业、具体且有见地的建议，涵盖政策、资金、人才或安全等方面。
           以Markdown格式返回。`,
         });
         setChatResponse(response.text || '抱歉，我暂时无法回答这个问题。');
       } catch (error) {
+        console.error("Chat failed:", error);
         setChatResponse('咨询服务暂时繁忙，请稍后再试。');
       }
       return;
     }
 
     setStep('searching');
-    
+
     // Special handling for SenseTime to show deep development path
     if (companyName.includes('商汤') || companyName.toLowerCase().includes('sensetime')) {
       setTimeout(() => {
@@ -740,6 +826,38 @@ export default function App() {
                     )}
                     
                     <div className="space-y-4">
+                      {profile.growthPrediction && (
+                        <div className="bg-indigo-50 p-6 rounded-2xl border border-indigo-100 mb-6">
+                          <h3 className="text-sm font-bold text-indigo-600 uppercase tracking-wider mb-3 flex items-center gap-2">
+                            <TrendingUp size={16} /> AI 成长预测 (2026-2030)
+                          </h3>
+                          <p className="text-sm text-slate-700 leading-relaxed italic">
+                            {profile.growthPrediction}
+                          </p>
+                        </div>
+                      )}
+
+                      {profile.matchedElements && (
+                        <div className="grid grid-cols-2 gap-4 mb-6">
+                          <div className="bg-orange-50 p-4 rounded-2xl border border-orange-100">
+                            <h4 className="text-[10px] font-bold text-orange-600 uppercase mb-2 flex items-center gap-1">
+                              <FileText size={12} /> 匹配政策
+                            </h4>
+                            <ul className="text-[10px] text-slate-600 space-y-1">
+                              {profile.matchedElements.policies.map((p, i) => <li key={i}>• {p}</li>)}
+                            </ul>
+                          </div>
+                          <div className="bg-blue-50 p-4 rounded-2xl border border-blue-100">
+                            <h4 className="text-[10px] font-bold text-blue-600 uppercase mb-2 flex items-center gap-1">
+                              <Coins size={12} /> 匹配基金
+                            </h4>
+                            <ul className="text-[10px] text-slate-600 space-y-1">
+                              {profile.matchedElements.funds.map((f, i) => <li key={i}>• {f}</li>)}
+                            </ul>
+                          </div>
+                        </div>
+                      )}
+
                       <div className="grid grid-cols-2 gap-4 mb-4">
                         {profile.revenue && (
                           <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">

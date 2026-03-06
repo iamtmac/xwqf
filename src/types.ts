@@ -9,6 +9,13 @@ export interface EnterpriseProfile {
   revenue?: string;
   employeeCount?: string;
   industryChallenges?: string[];
+  growthPrediction?: string;
+  matchedElements?: {
+    policies: string[];
+    funds: string[];
+    talents: string[];
+    security: string[];
+  };
 }
 
 export interface GrowthMilestone {
