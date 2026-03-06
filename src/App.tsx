@@ -25,7 +25,12 @@ import {
   ArrowLeft,
   Edit3,
   Upload,
-  Plus
+  Plus,
+  Share2,
+  MessageSquare,
+  Coins,
+  UserPlus,
+  Zap
 } from 'lucide-react';
 import { 
   LineChart, 
@@ -176,6 +181,8 @@ export default function App() {
   const [step, setStep] = useState<'landing' | 'searching' | 'confirming' | 'dashboard'>('landing');
   const [companyName, setCompanyName] = useState('');
   const [profile, setProfile] = useState<EnterpriseProfile | null>(null);
+  const [chatResponse, setChatResponse] = useState<string | null>(null);
+  const [isChatting, setIsChatting] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [selectedCase, setSelectedCase] = useState<(SuccessCase & { details: string, path: string[] }) | null>(null);
   const [isEditingDesc, setIsEditingDesc] = useState(false);
@@ -194,6 +201,13 @@ export default function App() {
     { id: 3, type: 'market', title: '长三角机器人产业集群专项资金公示', time: '5小时前' },
   ]);
 
+  const [jiaxingOpportunities] = useState([
+    { id: 1, industry: '新能源汽车', type: '供应链对接', title: '寻找年产 5000 吨级高纯度铝箔供应商', company: '某嘉兴百强汽配企业', time: '2小时前' },
+    { id: 2, industry: '集成电路', type: '融资需求', title: 'A 轮融资 5000 万，投后估值 3 亿', company: '某南湖区高新芯片设计企业', time: '5小时前' },
+    { id: 3, industry: '生物医药', type: '人才猎聘', title: '急聘首席科学家（年薪 150w+）', company: '某秀洲区生物医药研发平台', time: '1天前' },
+    { id: 4, industry: '智能制造', type: '数字化转型', title: '寻求 2000㎡ 智慧工厂整体解决方案', company: '某海宁市传统制造转型企业', time: '1天前' },
+  ]);
+
   const toggleTask = (id: number) => {
     setRoadmapTasks(prev => prev.map(t => {
       if (t.id === id) {
@@ -208,6 +222,26 @@ export default function App() {
 
   const handleSearch = async () => {
     if (!companyName) return;
+    
+    // Check if it's a question or a company name
+    const isQuestion = companyName.length > 10 || companyName.includes('?') || companyName.includes('？') || companyName.includes('如何') || companyName.includes('怎么');
+    
+    if (isQuestion) {
+      setIsChatting(true);
+      try {
+        const response = await ai.models.generateContent({
+          model: "gemini-3-flash-preview",
+          contents: `你是一个专业的企业经营顾问。请回答关于企业经营的问题："${companyName}"。
+          请提供专业、具体且有见地的建议，涵盖政策、资金、人才或安全等方面。
+          以Markdown格式返回。`,
+        });
+        setChatResponse(response.text || '抱歉，我暂时无法回答这个问题。');
+      } catch (error) {
+        setChatResponse('咨询服务暂时繁忙，请稍后再试。');
+      }
+      return;
+    }
+
     setStep('searching');
     
     // Special handling for SenseTime to show deep development path
@@ -269,6 +303,27 @@ export default function App() {
         industryChallenges: ["市场认知度低", "资金链紧张", "人才招聘困难"]
       });
       setStep('confirming');
+    }
+  };
+
+  const generateSolution = async (type: 'policy' | 'fund' | 'talent' | 'security') => {
+    setIsChatting(true);
+    setChatResponse(null);
+    const prompts = {
+      policy: "请为一家科创企业生成一份未来3年的政策申报规划方案，包含国家级、省级专项补贴建议。",
+      fund: "请为一家处于成长期的科技企业生成一份融资与政府引导基金对接方案，包含股权融资建议。",
+      talent: "请为一家高新技术企业生成一份核心人才梯队建设与高端人才猎聘解决方案。",
+      security: "请为一家企业生成一份全方位的智能化升级与 AI 赋能解决方案，助力企业提质增效。"
+    };
+    
+    try {
+      const response = await ai.models.generateContent({
+        model: "gemini-3-flash-preview",
+        contents: prompts[type],
+      });
+      setChatResponse(response.text || '方案生成失败。');
+    } catch (error) {
+      setChatResponse('方案生成服务暂时不可用。');
     }
   };
 
@@ -346,22 +401,22 @@ export default function App() {
               >
                 <div className="relative">
               <h1 className="text-5xl md:text-6xl font-extrabold tracking-tight mb-2 bg-gradient-to-r from-slate-900 via-indigo-900 to-slate-900 bg-clip-text text-transparent">
-                从“大水漫灌”到“精准滴灌”
+                全生命周期企业智能服务平台
               </h1>
               <p className="text-xl font-medium text-indigo-600/80 mb-6 tracking-widest">
                 开启“一行一策 千企千略”精准服务范式
               </p>
               <p className="text-lg text-slate-600 mb-10 leading-relaxed">
-                输入企业名称，开启全生命周期智能规划。我们通过大数据与AI，为您的企业预判未来，匹配最精准的政策、基金与安全保障。
+                输入企业名称开启智能诊断，或直接向 AI 提问关于政策、资金、人才及安全生产的经营难题。
               </p>
               
-              <div className="relative max-w-xl mx-auto group">
+              <div className="relative max-w-2xl mx-auto group mb-12">
                 <div className="absolute -inset-1 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
                 <div className="relative flex items-center bg-white rounded-2xl shadow-xl border border-slate-200 p-2">
-                  <Search className="ml-4 text-slate-400" size={24} />
+                  <MessageSquare className="ml-4 text-indigo-500" size={24} />
                   <input 
                     type="text" 
-                    placeholder="输入您的企业全称..."
+                    placeholder="输入企业名称诊断，或提问：如何申请专精特新？"
                     className="flex-1 px-4 py-3 outline-none text-lg"
                     value={companyName}
                     onChange={(e) => setCompanyName(e.target.value)}
@@ -371,8 +426,91 @@ export default function App() {
                     onClick={handleSearch}
                     className="bg-indigo-600 text-white px-8 py-3 rounded-xl font-semibold hover:bg-indigo-700 transition-all flex items-center gap-2"
                   >
-                    智能识别 <ArrowRight size={18} />
+                    AI 咨询 <Zap size={18} />
                   </button>
+                </div>
+              </div>
+
+              {/* Chat Response Overlay */}
+              <AnimatePresence>
+                {isChatting && (
+                  <motion.div 
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 10 }}
+                    className="max-w-2xl mx-auto mb-12 bg-white rounded-3xl border border-indigo-100 shadow-xl overflow-hidden text-left"
+                  >
+                    <div className="bg-indigo-50 px-6 py-3 border-b border-indigo-100 flex justify-between items-center">
+                      <div className="flex items-center gap-2 text-indigo-700 font-bold text-sm">
+                        <Sparkles size={16} />
+                        AI 智能方案建议
+                      </div>
+                      <button onClick={() => setIsChatting(false)} className="text-slate-400 hover:text-slate-600">
+                        <Plus size={20} className="rotate-45" />
+                      </button>
+                    </div>
+                    <div className="p-6 max-h-[400px] overflow-y-auto prose prose-slate prose-sm max-w-none">
+                      {chatResponse ? (
+                        <div className="whitespace-pre-wrap text-slate-700 leading-relaxed">
+                          {chatResponse}
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-3 text-slate-400 py-8 justify-center">
+                          <Loader2 className="animate-spin" size={20} />
+                          正在为您生成定制化解决方案...
+                        </div>
+                      )}
+                    </div>
+                    <div className="bg-slate-50 px-6 py-4 border-t border-slate-100 flex justify-end">
+                      <button className="text-indigo-600 font-bold text-sm flex items-center gap-1">
+                        下载完整方案 <ArrowRight size={16} />
+                      </button>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              {/* Service Entries Grid */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto mb-16">
+                <div 
+                  onClick={() => generateSolution('policy')}
+                  className="bg-white p-6 rounded-3xl border border-slate-200 hover:border-indigo-300 hover:shadow-lg transition-all cursor-pointer group"
+                >
+                  <div className="w-12 h-12 bg-orange-100 text-orange-600 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                    <FileText size={24} />
+                  </div>
+                  <h4 className="font-bold text-slate-900 mb-1">问政策</h4>
+                  <p className="text-xs text-slate-500">定制未来政策规划</p>
+                </div>
+                <div 
+                  onClick={() => generateSolution('fund')}
+                  className="bg-white p-6 rounded-3xl border border-slate-200 hover:border-indigo-300 hover:shadow-lg transition-all cursor-pointer group"
+                >
+                  <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                    <Coins size={24} />
+                  </div>
+                  <h4 className="font-bold text-slate-900 mb-1">找投资</h4>
+                  <p className="text-xs text-slate-500">定制资金对接方案</p>
+                </div>
+                <div 
+                  onClick={() => generateSolution('talent')}
+                  className="bg-white p-6 rounded-3xl border border-slate-200 hover:border-indigo-300 hover:shadow-lg transition-all cursor-pointer group"
+                >
+                  <div className="w-12 h-12 bg-purple-100 text-purple-600 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                    <UserPlus size={24} />
+                  </div>
+                  <h4 className="font-bold text-slate-900 mb-1">聘人才</h4>
+                  <p className="text-xs text-slate-500">高端人才精准猎聘</p>
+                </div>
+                <div 
+                  onClick={() => generateSolution('security')}
+                  className="bg-white p-6 rounded-3xl border border-slate-200 hover:border-indigo-300 hover:shadow-lg transition-all cursor-pointer group"
+                >
+                  <div className="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                    <ShieldCheck size={24} />
+                  </div>
+                  <h4 className="font-bold text-slate-900 mb-1">智能化</h4>
+                  <p className="text-xs text-slate-500">定制 AI 转型方案</p>
                 </div>
               </div>
               
@@ -392,6 +530,120 @@ export default function App() {
                 <div className="flex flex-col items-center gap-2">
                   <div className="text-2xl font-bold">24/7</div>
                   <div className="text-xs uppercase tracking-widest font-semibold">智能监控</div>
+                </div>
+              </div>
+
+              {/* Jiaxing Region Opportunities Feed - NEW ENGAGEMENT FEATURE */}
+              <div className="mt-24 text-left">
+                <div className="flex justify-between items-end mb-10">
+                  <div>
+                    <h2 className="text-3xl font-bold text-slate-900 mb-2 flex items-center gap-3">
+                      嘉兴地区企业商机
+                      <span className="flex items-center gap-1 px-2 py-0.5 bg-red-500 text-white text-[10px] font-bold rounded-full animate-pulse">
+                        <div className="w-1 h-1 bg-white rounded-full"></div>
+                        LIVE
+                      </span>
+                    </h2>
+                    <p className="text-slate-500">实时更新嘉兴本地企业的合作、融资与人才需求</p>
+                  </div>
+                  <button className="text-indigo-600 font-bold flex items-center gap-1 hover:gap-2 transition-all">
+                    查看更多商机 <ChevronRight size={20} />
+                  </button>
+                </div>
+
+                <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                  {jiaxingOpportunities.map((opp) => (
+                    <div key={opp.id} className="bg-white p-6 rounded-3xl border border-slate-200 hover:border-indigo-300 hover:shadow-xl transition-all group cursor-pointer">
+                      <div className="flex justify-between items-start mb-4">
+                        <span className="text-[10px] font-bold px-2 py-1 bg-indigo-50 text-indigo-600 rounded-lg uppercase tracking-wider">
+                          {opp.industry}
+                        </span>
+                        <span className="text-[10px] text-slate-400">{opp.time}</span>
+                      </div>
+                      <div className="mb-4">
+                        <div className="text-xs font-bold text-indigo-500 mb-1">{opp.type}</div>
+                        <h4 className="text-sm font-bold text-slate-900 leading-snug group-hover:text-indigo-600 transition-colors">
+                          {opp.title}
+                        </h4>
+                      </div>
+                      <div className="pt-4 border-t border-slate-100 flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <div className="w-6 h-6 bg-slate-100 rounded-full flex items-center justify-center">
+                            <ShieldCheck size={12} className="text-slate-400" />
+                          </div>
+                          <span className="text-[10px] font-medium text-slate-500 italic">{opp.company}</span>
+                        </div>
+                        <button className="text-indigo-600">
+                          <ArrowRight size={16} />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                
+                <div className="mt-10 bg-indigo-600 rounded-[2.5rem] p-8 text-white flex flex-col md:flex-row items-center justify-between gap-6 overflow-hidden relative">
+                  <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-20 -mt-20 blur-3xl"></div>
+                  <div className="relative z-10">
+                    <h3 className="text-2xl font-bold mb-2">想让您的需求也被精准匹配？</h3>
+                    <p className="text-indigo-100/80 text-sm">入驻小湾生态圈，让 AI 为您精准对接嘉兴乃至长三角的优质资源。</p>
+                  </div>
+                  <button className="relative z-10 px-8 py-4 bg-white text-indigo-600 rounded-2xl font-bold hover:bg-indigo-50 transition-all shadow-lg">
+                    立即免费入驻
+                  </button>
+                </div>
+              </div>
+
+              {/* Featured Services Section */}
+              <div className="mt-24 text-left">
+                <div className="flex justify-between items-end mb-10">
+                  <div>
+                    <h2 className="text-3xl font-bold text-slate-900 mb-2">热门服务专区</h2>
+                    <p className="text-slate-500">根据当前行业趋势为您推荐的高频服务</p>
+                  </div>
+                  <button className="text-indigo-600 font-bold flex items-center gap-1 hover:gap-2 transition-all">
+                    查看全部服务 <ChevronRight size={20} />
+                  </button>
+                </div>
+
+                <div className="grid md:grid-cols-3 gap-8">
+                  <div className="bg-white p-8 rounded-[2.5rem] border border-slate-200 hover:shadow-xl transition-all group">
+                    <div className="w-14 h-14 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-indigo-600 group-hover:text-white transition-all">
+                      <BarChart3 size={28} />
+                    </div>
+                    <h3 className="text-xl font-bold mb-3">融资路演诊断</h3>
+                    <p className="text-slate-500 text-sm leading-relaxed mb-6">
+                      AI 深度解析您的 BP，对标 500+ 活跃 VC 投资偏好，提供估值建议与路演话术优化。
+                    </p>
+                    <button className="w-full py-3 bg-slate-50 text-slate-900 rounded-2xl font-bold hover:bg-indigo-600 hover:text-white transition-all">
+                      立即开始
+                    </button>
+                  </div>
+
+                  <div className="bg-white p-8 rounded-[2.5rem] border border-slate-200 hover:shadow-xl transition-all group">
+                    <div className="w-14 h-14 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-emerald-600 group-hover:text-white transition-all">
+                      <ShieldCheck size={28} />
+                    </div>
+                    <h3 className="text-xl font-bold mb-3">知识产权导航</h3>
+                    <p className="text-slate-500 text-sm leading-relaxed mb-6">
+                      全网扫描技术竞品，预判专利侵权风险，为您定制核心技术专利布局策略。
+                    </p>
+                    <button className="w-full py-3 bg-slate-50 text-slate-900 rounded-2xl font-bold hover:bg-emerald-600 hover:text-white transition-all">
+                      立即扫描
+                    </button>
+                  </div>
+
+                  <div className="bg-white p-8 rounded-[2.5rem] border border-slate-200 hover:shadow-xl transition-all group">
+                    <div className="w-14 h-14 bg-orange-50 text-orange-600 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-orange-600 group-hover:text-white transition-all">
+                      <Rocket size={28} />
+                    </div>
+                    <h3 className="text-xl font-bold mb-3">政策申报管家</h3>
+                    <p className="text-slate-500 text-sm leading-relaxed mb-6">
+                      24h 监控全国政策动态，自动匹配符合条件的奖补项目，一键生成申报材料初稿。
+                    </p>
+                    <button className="w-full py-3 bg-slate-50 text-slate-900 rounded-2xl font-bold hover:bg-orange-600 hover:text-white transition-all">
+                      查看匹配
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -611,9 +863,9 @@ export default function App() {
                   </div>
                 </div>
                 <div className="flex gap-3">
-                  <button className="bg-white border border-slate-200 px-4 py-2 rounded-xl text-sm font-semibold hover:bg-slate-50 transition-all flex items-center gap-2 relative group">
-                    导出报告
-                    <div className="absolute -top-2 -right-2 bg-amber-500 text-white text-[8px] px-1.5 py-0.5 rounded-full font-bold opacity-0 group-hover:opacity-100 transition-opacity">PRO</div>
+                  <button className="bg-white border border-slate-200 px-4 py-2 rounded-xl text-sm font-semibold hover:bg-slate-50 transition-all flex items-center gap-2">
+                    <Share2 size={16} className="text-indigo-600" />
+                    分享成长报告
                   </button>
                   <button className="bg-indigo-600 text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-indigo-700 transition-all flex items-center gap-2">
                     联系专属顾问
@@ -901,16 +1153,9 @@ export default function App() {
                       <div className="text-lg font-bold">高新技术企业认定</div>
                       <p className="text-xs text-slate-500 mt-1">预计可减免税收 ¥200k/年</p>
                       
-                      {/* Pro Overlay for deeper insight */}
-                      <div className="absolute inset-0 bg-slate-900/80 backdrop-blur-[2px] flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                         <div className="flex items-center gap-1 text-amber-400 mb-2">
-                           <Sparkles size={14} />
-                           <span className="text-[10px] font-bold uppercase tracking-tighter">Pro 专属深度分析</span>
-                         </div>
-                         <button className="px-3 py-1 bg-indigo-600 text-white text-[10px] font-bold rounded-full hover:bg-indigo-700">
-                           查看申报成功率
-                         </button>
-                      </div>
+                      <button className="mt-3 w-full py-1.5 bg-indigo-600/20 hover:bg-indigo-600/40 text-indigo-300 text-[10px] font-bold rounded-lg transition-all">
+                        查看申报成功率分析
+                      </button>
                     </div>
                     <div className="p-4 bg-white/5 rounded-2xl border border-white/10">
                       <div className="flex justify-between items-center mb-2">
@@ -959,15 +1204,15 @@ export default function App() {
                       <Briefcase className="text-indigo-600" size={24} />
                       全生命周期集成服务
                     </h3>
-                    <div className="bg-amber-50 border border-amber-200 px-4 py-2 rounded-2xl flex items-center gap-3">
-                      <div className="flex items-center gap-1 text-amber-700 font-bold text-sm">
-                        <Sparkles size={16} />
-                        升级 Pro 会员
+                    <div className="bg-indigo-50 border border-indigo-100 px-4 py-2 rounded-2xl flex items-center gap-3">
+                      <div className="flex items-center gap-1 text-indigo-700 font-bold text-sm">
+                        <Users size={16} />
+                        邀请好友入驻
                       </div>
-                      <div className="h-4 w-px bg-amber-200"></div>
-                      <p className="text-xs text-amber-600">解锁深度竞品分析与政策申报绿色通道</p>
-                      <button className="bg-amber-600 text-white px-3 py-1 rounded-lg text-[10px] font-bold hover:bg-amber-700 transition-colors">
-                        立即升级
+                      <div className="h-4 w-px bg-indigo-200"></div>
+                      <p className="text-xs text-indigo-600">每邀请一家企业入驻，即可解锁更多行业深度报告</p>
+                      <button className="bg-indigo-600 text-white px-3 py-1 rounded-lg text-[10px] font-bold hover:bg-indigo-700 transition-colors">
+                        立即邀请
                       </button>
                     </div>
                   </div>
@@ -1035,7 +1280,7 @@ export default function App() {
                     </button>
                   </div>
 
-                  {/* Competitor Intelligence - NEW MONETIZATION FEATURE */}
+                  {/* Competitor Intelligence - FULLY UNLOCKED */}
                   <div className="bg-white p-6 rounded-3xl border border-slate-200 hover:shadow-lg transition-all group relative overflow-hidden">
                     <div className="w-12 h-12 bg-red-100 text-red-600 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                       <TrendingUp size={24} />
@@ -1043,18 +1288,18 @@ export default function App() {
                     <h4 className="text-lg font-bold mb-2">深度竞品分析</h4>
                     <p className="text-sm text-slate-500 mb-4">监控 3 家核心竞品的人才流向与专利布局动态。</p>
                     
-                    {/* Pro Lock Overlay */}
-                    <div className="absolute inset-0 bg-white/60 backdrop-blur-sm flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                      <div className="bg-slate-900 text-white p-4 rounded-2xl shadow-xl flex flex-col items-center text-center max-w-[80%]">
-                        <ShieldCheck className="text-amber-400 mb-2" size={32} />
-                        <div className="text-xs font-bold mb-1">PRO 专属功能</div>
-                        <p className="text-[10px] text-slate-400 mb-3">解锁竞品融资细节与核心技术拆解</p>
-                        <button className="w-full py-2 bg-indigo-600 rounded-lg text-[10px] font-bold">立即升级解锁</button>
+                    <div className="mt-4 space-y-2">
+                      <div className="flex justify-between text-[10px] text-slate-400">
+                        <span>技术重合度</span>
+                        <span className="text-red-500 font-bold">82% (高)</span>
+                      </div>
+                      <div className="w-full bg-slate-100 h-1 rounded-full overflow-hidden">
+                        <div className="bg-red-500 h-full w-[82%]"></div>
                       </div>
                     </div>
                     
-                    <button className="text-red-600 text-sm font-bold flex items-center gap-1">
-                      查看简版分析 <ChevronRight size={16} />
+                    <button className="mt-4 text-indigo-600 text-sm font-bold flex items-center gap-1 hover:gap-2 transition-all">
+                      查看完整竞品报告 <ChevronRight size={16} />
                     </button>
                   </div>
 
