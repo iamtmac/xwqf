@@ -245,7 +245,7 @@ export default function App() {
               content: `请提供：
               1. 企业画像（名称、行业、阶段、简介、核心技术、竞品、融资状态、营收估算、员工规模、行业挑战）
               2. 成长预测（未来3-5年的发展趋势预测）
-              3. 要素匹配（匹配嘉兴本地的政策、基金、人才、安全方案）
+              3. 要素匹配（匹配嘉兴本地的政策、空间、金融、能源、科技、人才、供应链、销售方案）
               
               返回JSON格式：
               {
@@ -262,9 +262,13 @@ export default function App() {
                 "growthPrediction": "未来3-5年预测内容...",
                 "matchedElements": {
                   "policies": ["政策1", "政策2"],
-                  "funds": ["基金1", "基金2"],
+                  "space": ["空间需求1", "空间需求2"],
+                  "finance": ["金融方案1", "金融方案2"],
+                  "energy": ["能源方案1"],
+                  "technology": ["科技赋能1", "科技赋能2"],
                   "talents": ["人才需求1", "人才需求2"],
-                  "security": ["安全方案1"]
+                  "supplyChain": ["供应链优化1"],
+                  "sales": ["销售渠道1"]
                 }
               }`
             }
@@ -304,9 +308,13 @@ export default function App() {
           growthPrediction: "预计未来3年将成为长三角地区领先的算力调度平台，营收规模有望突破5亿元，并启动科创板上市计划。",
           matchedElements: {
             "policies": ["嘉兴市数字经济核心产业奖励", "浙江省专精特新中小企业补贴"],
-            "funds": ["嘉兴南湖基金", "长三角数字经济产业基金"],
+            "space": ["嘉兴南湖高新区智造园", "长三角数字经济产业园"],
+            "finance": ["嘉兴南湖基金", "长三角数字经济产业基金", "科技贷"],
+            "energy": ["绿色数据中心能耗指标补贴", "光伏发电自供电方案"],
+            "technology": ["数据全生命周期加密方案", "多模态大模型调度优化"],
             "talents": ["资深算法架构师", "大数据安全专家"],
-            "security": ["数据全生命周期加密方案"]
+            "supplyChain": ["国产GPU芯片供应链保障", "算力租赁分发网络"],
+            "sales": ["长三角政务云采购目录", "大型国企数字化转型供应商库"]
           }
         });
         setStep('confirming');
@@ -386,7 +394,17 @@ export default function App() {
               "keyTech": ["技术关键词1", "2"],
               "competitors": ["竞品1", "2"],
               "fundingStatus": "当前融资状态",
-              "industryChallenges": ["行业困境1", "行业困境2"]
+              "industryChallenges": ["行业困境1", "行业困境2"],
+              "matchedElements": {
+                "policies": ["匹配政策1", "2"],
+                "space": ["空间建议1", "2"],
+                "finance": ["金融方案1", "2"],
+                "energy": ["能源建议1"],
+                "technology": ["技术赋能1"],
+                "talents": ["人才需求1"],
+                "supplyChain": ["供应链建议1"],
+                "sales": ["销售渠道1"]
+              }
             }`
           }
         ],
@@ -414,14 +432,18 @@ export default function App() {
     }
   };
 
-  const generateSolution = async (type: 'policy' | 'fund' | 'talent' | 'security') => {
+  const generateSolution = async (type: 'policy' | 'space' | 'finance' | 'energy' | 'technology' | 'talent' | 'supplyChain' | 'sales') => {
     setIsChatting(true);
     setChatResponse(null);
     const prompts = {
       policy: "请为一家科创企业生成一份未来3年的政策申报规划方案，包含国家级、省级专项补贴建议。",
-      fund: "请为一家处于成长期的科技企业生成一份融资与政府引导基金对接方案，包含股权融资建议。",
+      space: "请为一家企业提供办公、生产或研发空间的选址建议与入驻优惠政策分析。",
+      finance: "请为一家处于成长期的科技企业生成一份融资与政府引导基金对接方案，包含股权融资建议。",
+      energy: "请为一家企业提供绿色能源转型、节能降耗以及碳中和路径规划方案。",
+      technology: "请为一家企业生成一份全方位的智能化升级与 AI 赋能解决方案，助力企业提质增效。",
       talent: "请为一家高新技术企业生成一份核心人才梯队建设与高端人才猎聘解决方案。",
-      security: "请为一家企业生成一份全方位的智能化升级与 AI 赋能解决方案，助力企业提质增效。"
+      supplyChain: "请为一家企业提供供应链优化、原材料保障以及上下游协同发展方案。",
+      sales: "请为一家企业提供市场开拓、销售渠道拓展以及品牌建设方案。"
     };
     
     try {
@@ -517,14 +539,11 @@ export default function App() {
                 className="relative text-center max-w-3xl mx-auto py-20 z-10"
               >
                 <div className="relative">
-              <h1 className="text-5xl md:text-6xl font-extrabold tracking-tight mb-2 bg-gradient-to-r from-slate-900 via-indigo-900 to-slate-900 bg-clip-text text-transparent">
-                全生命周期企业智能服务平台
+              <h1 className="text-5xl md:text-6xl font-extrabold tracking-tight mb-4 bg-gradient-to-r from-slate-900 via-indigo-900 to-slate-900 bg-clip-text text-transparent">
+                数智驱动 助企成长
               </h1>
-              <p className="text-xl font-medium text-indigo-600/80 mb-6 tracking-widest">
-                开启“一行一策 千企千略”精准服务范式
-              </p>
-              <p className="text-lg text-slate-600 mb-10 leading-relaxed">
-                输入企业名称开启智能诊断，或直接向 AI 提问关于政策、资金、人才及安全生产的经营难题。
+              <p className="text-lg text-slate-600 mb-10 leading-relaxed max-w-2xl mx-auto">
+                输入企业名称开启 AI 深度诊断，精准匹配政策、资金、人才及全维度经营要素。
               </p>
               
               <div className="relative max-w-2xl mx-auto group mb-12">
@@ -596,38 +615,34 @@ export default function App() {
                   <div className="w-12 h-12 bg-orange-100 text-orange-600 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                     <FileText size={24} />
                   </div>
-                  <h4 className="font-bold text-slate-900 mb-1">问政策</h4>
-                  <p className="text-xs text-slate-500">定制未来政策规划</p>
+                  <h4 className="font-bold text-slate-900">问政策</h4>
                 </div>
                 <div 
-                  onClick={() => generateSolution('fund')}
-                  className="bg-white p-6 rounded-3xl border border-slate-200 hover:border-indigo-300 hover:shadow-lg transition-all cursor-pointer group"
+                  onClick={() => generateSolution('finance')}
+                  className="bg-white p-6 rounded-3xl border border-slate-200 hover:border-indigo-300 hover:shadow-lg transition-all cursor-pointer group text-center"
                 >
-                  <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                  <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center mb-4 mx-auto group-hover:scale-110 transition-transform">
                     <Coins size={24} />
                   </div>
-                  <h4 className="font-bold text-slate-900 mb-1">找投资</h4>
-                  <p className="text-xs text-slate-500">定制资金对接方案</p>
+                  <h4 className="font-bold text-slate-900">找金融</h4>
                 </div>
                 <div 
                   onClick={() => generateSolution('talent')}
-                  className="bg-white p-6 rounded-3xl border border-slate-200 hover:border-indigo-300 hover:shadow-lg transition-all cursor-pointer group"
+                  className="bg-white p-6 rounded-3xl border border-slate-200 hover:border-indigo-300 hover:shadow-lg transition-all cursor-pointer group text-center"
                 >
-                  <div className="w-12 h-12 bg-purple-100 text-purple-600 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                  <div className="w-12 h-12 bg-purple-100 text-purple-600 rounded-2xl flex items-center justify-center mb-4 mx-auto group-hover:scale-110 transition-transform">
                     <UserPlus size={24} />
                   </div>
-                  <h4 className="font-bold text-slate-900 mb-1">聘人才</h4>
-                  <p className="text-xs text-slate-500">高端人才精准猎聘</p>
+                  <h4 className="font-bold text-slate-900">聘人才</h4>
                 </div>
                 <div 
-                  onClick={() => generateSolution('security')}
-                  className="bg-white p-6 rounded-3xl border border-slate-200 hover:border-indigo-300 hover:shadow-lg transition-all cursor-pointer group"
+                  onClick={() => generateSolution('technology')}
+                  className="bg-white p-6 rounded-3xl border border-slate-200 hover:border-indigo-300 hover:shadow-lg transition-all cursor-pointer group text-center"
                 >
-                  <div className="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                    <ShieldCheck size={24} />
+                  <div className="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center mb-4 mx-auto group-hover:scale-110 transition-transform">
+                    <Cpu size={24} />
                   </div>
-                  <h4 className="font-bold text-slate-900 mb-1">智能化</h4>
-                  <p className="text-xs text-slate-500">定制 AI 转型方案</p>
+                  <h4 className="font-bold text-slate-900">强科技</h4>
                 </div>
               </div>
               
@@ -655,13 +670,13 @@ export default function App() {
                 <div className="flex justify-between items-end mb-10">
                   <div>
                     <h2 className="text-3xl font-bold text-slate-900 mb-2 flex items-center gap-3">
-                      嘉兴地区企业商机
+                      嘉兴企业商机
                       <span className="flex items-center gap-1 px-2 py-0.5 bg-red-500 text-white text-[10px] font-bold rounded-full animate-pulse">
                         <div className="w-1 h-1 bg-white rounded-full"></div>
                         LIVE
                       </span>
                     </h2>
-                    <p className="text-slate-500">实时更新嘉兴本地企业的合作、融资与人才需求</p>
+                    <p className="text-slate-500">实时匹配本地合作、融资与人才需求</p>
                   </div>
                   <button className="text-indigo-600 font-bold flex items-center gap-1 hover:gap-2 transition-all">
                     查看更多商机 <ChevronRight size={20} />
@@ -701,8 +716,8 @@ export default function App() {
                 <div className="mt-10 bg-indigo-600 rounded-[2.5rem] p-8 text-white flex flex-col md:flex-row items-center justify-between gap-6 overflow-hidden relative">
                   <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-20 -mt-20 blur-3xl"></div>
                   <div className="relative z-10">
-                    <h3 className="text-2xl font-bold mb-2">想让您的需求也被精准匹配？</h3>
-                    <p className="text-indigo-100/80 text-sm">入驻小湾生态圈，让 AI 为您精准对接嘉兴乃至长三角的优质资源。</p>
+                    <h3 className="text-2xl font-bold mb-2">发布您的企业需求</h3>
+                    <p className="text-indigo-100/80 text-sm">入驻小湾生态，精准对接长三角优质资源。</p>
                   </div>
                   <button className="relative z-10 px-8 py-4 bg-white text-indigo-600 rounded-2xl font-bold hover:bg-indigo-50 transition-all shadow-lg">
                     立即免费入驻
@@ -729,7 +744,7 @@ export default function App() {
                     </div>
                     <h3 className="text-xl font-bold mb-3">融资路演诊断</h3>
                     <p className="text-slate-500 text-sm leading-relaxed mb-6">
-                      AI 深度解析您的 BP，对标 500+ 活跃 VC 投资偏好，提供估值建议与路演话术优化。
+                      AI 深度解析 BP，对标 500+ 活跃 VC，提供估值建议与路演优化。
                     </p>
                     <button className="w-full py-3 bg-slate-50 text-slate-900 rounded-2xl font-bold hover:bg-indigo-600 hover:text-white transition-all">
                       立即开始
@@ -742,7 +757,7 @@ export default function App() {
                     </div>
                     <h3 className="text-xl font-bold mb-3">知识产权导航</h3>
                     <p className="text-slate-500 text-sm leading-relaxed mb-6">
-                      全网扫描技术竞品，预判专利侵权风险，为您定制核心技术专利布局策略。
+                      全网扫描技术竞品，预判侵权风险，定制核心技术专利布局策略。
                     </p>
                     <button className="w-full py-3 bg-slate-50 text-slate-900 rounded-2xl font-bold hover:bg-emerald-600 hover:text-white transition-all">
                       立即扫描
@@ -755,7 +770,7 @@ export default function App() {
                     </div>
                     <h3 className="text-xl font-bold mb-3">政策申报管家</h3>
                     <p className="text-slate-500 text-sm leading-relaxed mb-6">
-                      24h 监控全国政策动态，自动匹配符合条件的奖补项目，一键生成申报材料初稿。
+                      24h 监控政策动态，自动匹配奖补项目，一键生成申报材料初稿。
                     </p>
                     <button className="w-full py-3 bg-slate-50 text-slate-900 rounded-2xl font-bold hover:bg-orange-600 hover:text-white transition-all">
                       查看匹配
@@ -869,7 +884,7 @@ export default function App() {
                       )}
 
                       {profile.matchedElements && (
-                        <div className="grid grid-cols-2 gap-4 mb-6">
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
                           <div className="bg-orange-50 p-4 rounded-2xl border border-orange-100">
                             <h4 className="text-[10px] font-bold text-orange-600 uppercase mb-2 flex items-center gap-1">
                               <FileText size={12} /> 匹配政策
@@ -878,12 +893,60 @@ export default function App() {
                               {profile.matchedElements.policies.map((p, i) => <li key={i}>• {p}</li>)}
                             </ul>
                           </div>
-                          <div className="bg-blue-50 p-4 rounded-2xl border border-blue-100">
-                            <h4 className="text-[10px] font-bold text-blue-600 uppercase mb-2 flex items-center gap-1">
-                              <Coins size={12} /> 匹配基金
+                          <div className="bg-sky-50 p-4 rounded-2xl border border-sky-100">
+                            <h4 className="text-[10px] font-bold text-sky-600 uppercase mb-2 flex items-center gap-1">
+                              <Globe size={12} /> 空间建议
                             </h4>
                             <ul className="text-[10px] text-slate-600 space-y-1">
-                              {profile.matchedElements.funds.map((f, i) => <li key={i}>• {f}</li>)}
+                              {profile.matchedElements.space.map((s, i) => <li key={i}>• {s}</li>)}
+                            </ul>
+                          </div>
+                          <div className="bg-blue-50 p-4 rounded-2xl border border-blue-100">
+                            <h4 className="text-[10px] font-bold text-blue-600 uppercase mb-2 flex items-center gap-1">
+                              <Coins size={12} /> 金融方案
+                            </h4>
+                            <ul className="text-[10px] text-slate-600 space-y-1">
+                              {profile.matchedElements.finance.map((f, i) => <li key={i}>• {f}</li>)}
+                            </ul>
+                          </div>
+                          <div className="bg-yellow-50 p-4 rounded-2xl border border-yellow-100">
+                            <h4 className="text-[10px] font-bold text-yellow-600 uppercase mb-2 flex items-center gap-1">
+                              <Zap size={12} /> 能源建议
+                            </h4>
+                            <ul className="text-[10px] text-slate-600 space-y-1">
+                              {profile.matchedElements.energy.map((e, i) => <li key={i}>• {e}</li>)}
+                            </ul>
+                          </div>
+                          <div className="bg-emerald-50 p-4 rounded-2xl border border-emerald-100">
+                            <h4 className="text-[10px] font-bold text-emerald-600 uppercase mb-2 flex items-center gap-1">
+                              <Cpu size={12} /> 科技赋能
+                            </h4>
+                            <ul className="text-[10px] text-slate-600 space-y-1">
+                              {profile.matchedElements.technology.map((t, i) => <li key={i}>• {t}</li>)}
+                            </ul>
+                          </div>
+                          <div className="bg-purple-50 p-4 rounded-2xl border border-purple-100">
+                            <h4 className="text-[10px] font-bold text-purple-600 uppercase mb-2 flex items-center gap-1">
+                              <UserPlus size={12} /> 人才需求
+                            </h4>
+                            <ul className="text-[10px] text-slate-600 space-y-1">
+                              {profile.matchedElements.talents.map((t, i) => <li key={i}>• {t}</li>)}
+                            </ul>
+                          </div>
+                          <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                            <h4 className="text-[10px] font-bold text-slate-600 uppercase mb-2 flex items-center gap-1">
+                              <Briefcase size={12} /> 供应链
+                            </h4>
+                            <ul className="text-[10px] text-slate-600 space-y-1">
+                              {profile.matchedElements.supplyChain.map((s, i) => <li key={i}>• {s}</li>)}
+                            </ul>
+                          </div>
+                          <div className="bg-rose-50 p-4 rounded-2xl border border-rose-100">
+                            <h4 className="text-[10px] font-bold text-rose-600 uppercase mb-2 flex items-center gap-1">
+                              <TrendingUp size={12} /> 销售渠道
+                            </h4>
+                            <ul className="text-[10px] text-slate-600 space-y-1">
+                              {profile.matchedElements.sales.map((s, i) => <li key={i}>• {s}</li>)}
                             </ul>
                           </div>
                         </div>

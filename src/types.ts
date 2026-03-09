@@ -12,9 +12,13 @@ export interface EnterpriseProfile {
   growthPrediction?: string;
   matchedElements?: {
     policies: string[];
-    funds: string[];
+    space: string[];
+    finance: string[];
+    energy: string[];
+    technology: string[];
     talents: string[];
-    security: string[];
+    supplyChain: string[];
+    sales: string[];
   };
 }
 
