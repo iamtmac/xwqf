@@ -46,7 +46,7 @@ import {
   ReferenceLine,
   Label
 } from 'recharts';
-import { GoogleGenAI } from "@google/genai";
+import OpenAI from 'openai';
 import { cn } from './lib/utils';
 import { EnterpriseProfile, GrowthMilestone, ServiceMatch, SuccessCase } from './types';
 
@@ -218,7 +218,12 @@ export default function App() {
     }));
   };
 
-  const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || '' });
+  const openai = new OpenAI({
+    apiKey: import.meta.env.VITE_LLM_API_KEY || '',
+    baseURL: import.meta.env.VITE_LLM_BASE_URL || 'https://dashscope.aliyuncs.com/compatible-mode/v1',
+    dangerouslyAllowBrowser: true,
+  });
+  const LLM_MODEL = import.meta.env.VITE_LLM_MODEL || 'qwen-max';
 
   const handleSearch = async () => {
     const query = companyName.trim();
@@ -228,42 +233,46 @@ export default function App() {
     if (query.includes('浙江金数湾') || query.includes('金数湾')) {
       setStep('searching');
       try {
-        const response = await ai.models.generateContent({
-          model: "gemini-3-flash-preview",
-          contents: `你是一个专业的企业咨询顾问。请联网搜索并深入分析"浙江金数湾科技有限公司"。
-          这家公司位于嘉兴，主要从事大数据和人工智能业务。
-          请提供：
-          1. 企业画像（名称、行业、阶段、简介、核心技术、竞品、融资状态、营收估算、员工规模、行业挑战）
-          2. 成长预测（未来3-5年的发展趋势预测）
-          3. 要素匹配（匹配嘉兴本地的政策、基金、人才、安全方案）
-          
-          返回JSON格式：
-          {
-            "name": "浙江金数湾科技有限公司",
-            "industry": "大数据/人工智能",
-            "stage": "成长期",
-            "description": "...",
-            "keyTech": ["...", "..."],
-            "competitors": ["...", "..."],
-            "fundingStatus": "...",
-            "revenue": "...",
-            "employeeCount": "...",
-            "industryChallenges": ["...", "..."],
-            "growthPrediction": "未来3-5年预测内容...",
-            "matchedElements": {
-              "policies": ["政策1", "政策2"],
-              "funds": ["基金1", "基金2"],
-              "talents": ["人才需求1", "人才需求2"],
-              "security": ["安全方案1"]
+        const response = await openai.chat.completions.create({
+          model: LLM_MODEL,
+          messages: [
+            {
+              role: "system",
+              content: "你是一个专业的企业咨询顾问。请深入分析'浙江金数湾科技有限公司'。这家公司位于嘉兴，主要从事大数据和人工智能业务。"
+            },
+            {
+              role: "user",
+              content: `请提供：
+              1. 企业画像（名称、行业、阶段、简介、核心技术、竞品、融资状态、营收估算、员工规模、行业挑战）
+              2. 成长预测（未来3-5年的发展趋势预测）
+              3. 要素匹配（匹配嘉兴本地的政策、基金、人才、安全方案）
+              
+              返回JSON格式：
+              {
+                "name": "浙江金数湾科技有限公司",
+                "industry": "大数据/人工智能",
+                "stage": "成长期",
+                "description": "...",
+                "keyTech": ["...", "..."],
+                "competitors": ["...", "..."],
+                "fundingStatus": "...",
+                "revenue": "...",
+                "employeeCount": "...",
+                "industryChallenges": ["...", "..."],
+                "growthPrediction": "未来3-5年预测内容...",
+                "matchedElements": {
+                  "policies": ["政策1", "政策2"],
+                  "funds": ["基金1", "基金2"],
+                  "talents": ["人才需求1", "人才需求2"],
+                  "security": ["安全方案1"]
+                }
+              }`
             }
-          }`,
-          config: { 
-            responseMimeType: "application/json",
-            tools: [{ googleSearch: {} }] 
-          }
+          ],
+          response_format: { type: "json_object" }
         });
         
-        const text = response.text;
+        const text = response.choices[0].message.content;
         if (!text) throw new Error("Empty response from AI");
         
         const data = JSON.parse(text);
@@ -314,13 +323,20 @@ export default function App() {
       setIsChatting(true);
       setChatResponse(null);
       try {
-        const response = await ai.models.generateContent({
-          model: "gemini-3-flash-preview",
-          contents: `你是一个专业的企业经营顾问。请回答关于企业经营的问题："${query}"。
-          请提供专业、具体且有见地的建议，涵盖政策、资金、人才或安全等方面。
-          以Markdown格式返回。`,
+        const response = await openai.chat.completions.create({
+          model: LLM_MODEL,
+          messages: [
+            {
+              role: "system",
+              content: "你是一个专业的企业经营顾问。"
+            },
+            {
+              role: "user",
+              content: `请回答关于企业经营的问题："${query}"。请提供专业、具体且有见地的建议，涵盖政策、资金、人才或安全等方面。以Markdown格式返回。`
+            }
+          ]
         });
-        setChatResponse(response.text || '抱歉，我暂时无法回答这个问题。');
+        setChatResponse(response.choices[0].message.content || '抱歉，我暂时无法回答这个问题。');
       } catch (error) {
         console.error("Chat failed:", error);
         setChatResponse('咨询服务暂时繁忙，请稍后再试。');
@@ -351,28 +367,34 @@ export default function App() {
     }
 
     try {
-      const response = await ai.models.generateContent({
-        model: "gemini-3-flash-preview",
-        contents: `你是一个专业的企业咨询顾问。请联网搜索并分析名为"${companyName}"的企业。
-        如果找不到真实企业，请根据名称猜测其可能的业务方向，生成一个合理的模拟画像。
-        返回JSON格式：
-        {
-          "name": "企业名称",
-          "industry": "所属行业",
-          "stage": "种子期/初创期/成长期/成熟期",
-          "description": "企业简介",
-          "keyTech": ["技术关键词1", "2"],
-          "competitors": ["竞品1", "2"],
-          "fundingStatus": "当前融资状态",
-          "industryChallenges": ["行业困境1", "行业困境2"]
-        }`,
-        config: { 
-          responseMimeType: "application/json",
-          tools: [{ googleSearch: {} }] 
-        }
+      const response = await openai.chat.completions.create({
+        model: LLM_MODEL,
+        messages: [
+          {
+            role: "system",
+            content: "你是一个专业的企业咨询顾问。"
+          },
+          {
+            role: "user",
+            content: `请分析名为"${companyName}"的企业。如果找不到真实企业，请根据名称猜测其可能的业务方向，生成一个合理的模拟画像。
+            返回JSON格式：
+            {
+              "name": "企业名称",
+              "industry": "所属行业",
+              "stage": "种子期/初创期/成长期/成熟期",
+              "description": "企业简介",
+              "keyTech": ["技术关键词1", "2"],
+              "competitors": ["竞品1", "2"],
+              "fundingStatus": "当前融资状态",
+              "industryChallenges": ["行业困境1", "行业困境2"]
+            }`
+          }
+        ],
+        response_format: { type: "json_object" }
       });
 
-      const data = JSON.parse(response.text || '{}');
+      const text = response.choices[0].message.content;
+      const data = JSON.parse(text || '{}');
       setProfile(data);
       setStep('confirming');
     } catch (error) {
@@ -403,11 +425,20 @@ export default function App() {
     };
     
     try {
-      const response = await ai.models.generateContent({
-        model: "gemini-3-flash-preview",
-        contents: prompts[type],
+      const response = await openai.chat.completions.create({
+        model: LLM_MODEL,
+        messages: [
+          {
+            role: "system",
+            content: "你是一个专业的企业咨询顾问。"
+          },
+          {
+            role: "user",
+            content: `${prompts[type]} 针对企业：${profile?.name}。行业：${profile?.industry}。阶段：${profile?.stage}。`
+          }
+        ]
       });
-      setChatResponse(response.text || '方案生成失败。');
+      setChatResponse(response.choices[0].message.content || '方案生成失败。');
     } catch (error) {
       setChatResponse('方案生成服务暂时不可用。');
     }
