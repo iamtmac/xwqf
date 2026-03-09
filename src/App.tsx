@@ -254,10 +254,10 @@ export default function App() {
                 "stage": "成长期",
                 "description": "...",
                 "keyTech": ["...", "..."],
-                "competitors": ["...", "..."],
+                "competitors": ["南湖算力中心", "嘉兴数字经济平台", "长三角数据港"],
                 "fundingStatus": "...",
-                "revenue": "...",
-                "employeeCount": "...",
+                "revenue": "< 1000万",
+                "employeeCount": "< 50人",
                 "industryChallenges": ["...", "..."],
                 "growthPrediction": "未来3-5年预测内容...",
                 "matchedElements": {
@@ -300,21 +300,21 @@ export default function App() {
           stage: "成长期",
           description: "浙江金数湾科技有限公司（简称“金数湾”）是一家专注于大数据处理、人工智能算法研发及算力服务的高新技术企业。公司立足嘉兴，深度参与长三角一体化数字经济建设，致力于为政府及企业提供全栈式数字化转型解决方案。",
           keyTech: ["分布式存储架构", "多模态大模型调度", "隐私计算技术"],
-          competitors: ["阿里云", "腾讯云", "商汤科技"],
+          competitors: ["南湖算力中心", "嘉兴数字经济平台", "长三角数据港"],
           fundingStatus: "B轮融资中",
-          revenue: "约 1.2 亿人民币 (2025)",
-          employeeCount: "200-500人",
+          revenue: "< 1000万",
+          employeeCount: "< 50人",
           industryChallenges: ["算力资源成本波动", "数据合规性监管加强"],
-          growthPrediction: "预计未来3年将成为长三角地区领先的算力调度平台，营收规模有望突破5亿元，并启动科创板上市计划。",
+          growthPrediction: "预计未来3年将成为长三角地区领先的算力调度平台，营收规模有望突破5000万元，并启动高新技术企业认定。",
           matchedElements: {
-            "policies": ["嘉兴市数字经济核心产业奖励", "浙江省专精特新中小企业补贴"],
-            "space": ["嘉兴南湖高新区智造园", "长三角数字经济产业园"],
-            "finance": ["嘉兴南湖基金", "长三角数字经济产业基金", "科技贷"],
-            "energy": ["绿色数据中心能耗指标补贴", "光伏发电自供电方案"],
-            "technology": ["数据全生命周期加密方案", "多模态大模型调度优化"],
+            "policies": ["嘉兴市数字经济核心产业奖励", "浙江省科技型中小企业认定"],
+            "space": ["嘉兴南湖高新区智造园", "南湖区科创中心"],
+            "finance": ["嘉兴南湖基金", "科技贷"],
+            "energy": ["绿色数据中心能耗指标补贴"],
+            "technology": ["数据全生命周期加密方案"],
             "talents": ["资深算法架构师", "大数据安全专家"],
-            "supplyChain": ["国产GPU芯片供应链保障", "算力租赁分发网络"],
-            "sales": ["长三角政务云采购目录", "大型国企数字化转型供应商库"]
+            "supplyChain": ["国产GPU芯片供应链保障"],
+            "sales": ["长三角政务云采购目录"]
           }
         });
         setStep('confirming');
@@ -880,75 +880,6 @@ export default function App() {
                           <p className="text-sm text-slate-700 leading-relaxed italic">
                             {profile.growthPrediction}
                           </p>
-                        </div>
-                      )}
-
-                      {profile.matchedElements && (
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                          <div className="bg-orange-50 p-4 rounded-2xl border border-orange-100">
-                            <h4 className="text-[10px] font-bold text-orange-600 uppercase mb-2 flex items-center gap-1">
-                              <FileText size={12} /> 匹配政策
-                            </h4>
-                            <ul className="text-[10px] text-slate-600 space-y-1">
-                              {profile.matchedElements.policies.map((p, i) => <li key={i}>• {p}</li>)}
-                            </ul>
-                          </div>
-                          <div className="bg-sky-50 p-4 rounded-2xl border border-sky-100">
-                            <h4 className="text-[10px] font-bold text-sky-600 uppercase mb-2 flex items-center gap-1">
-                              <Globe size={12} /> 空间建议
-                            </h4>
-                            <ul className="text-[10px] text-slate-600 space-y-1">
-                              {profile.matchedElements.space.map((s, i) => <li key={i}>• {s}</li>)}
-                            </ul>
-                          </div>
-                          <div className="bg-blue-50 p-4 rounded-2xl border border-blue-100">
-                            <h4 className="text-[10px] font-bold text-blue-600 uppercase mb-2 flex items-center gap-1">
-                              <Coins size={12} /> 金融方案
-                            </h4>
-                            <ul className="text-[10px] text-slate-600 space-y-1">
-                              {profile.matchedElements.finance.map((f, i) => <li key={i}>• {f}</li>)}
-                            </ul>
-                          </div>
-                          <div className="bg-yellow-50 p-4 rounded-2xl border border-yellow-100">
-                            <h4 className="text-[10px] font-bold text-yellow-600 uppercase mb-2 flex items-center gap-1">
-                              <Zap size={12} /> 能源建议
-                            </h4>
-                            <ul className="text-[10px] text-slate-600 space-y-1">
-                              {profile.matchedElements.energy.map((e, i) => <li key={i}>• {e}</li>)}
-                            </ul>
-                          </div>
-                          <div className="bg-emerald-50 p-4 rounded-2xl border border-emerald-100">
-                            <h4 className="text-[10px] font-bold text-emerald-600 uppercase mb-2 flex items-center gap-1">
-                              <Cpu size={12} /> 科技赋能
-                            </h4>
-                            <ul className="text-[10px] text-slate-600 space-y-1">
-                              {profile.matchedElements.technology.map((t, i) => <li key={i}>• {t}</li>)}
-                            </ul>
-                          </div>
-                          <div className="bg-purple-50 p-4 rounded-2xl border border-purple-100">
-                            <h4 className="text-[10px] font-bold text-purple-600 uppercase mb-2 flex items-center gap-1">
-                              <UserPlus size={12} /> 人才需求
-                            </h4>
-                            <ul className="text-[10px] text-slate-600 space-y-1">
-                              {profile.matchedElements.talents.map((t, i) => <li key={i}>• {t}</li>)}
-                            </ul>
-                          </div>
-                          <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
-                            <h4 className="text-[10px] font-bold text-slate-600 uppercase mb-2 flex items-center gap-1">
-                              <Briefcase size={12} /> 供应链
-                            </h4>
-                            <ul className="text-[10px] text-slate-600 space-y-1">
-                              {profile.matchedElements.supplyChain.map((s, i) => <li key={i}>• {s}</li>)}
-                            </ul>
-                          </div>
-                          <div className="bg-rose-50 p-4 rounded-2xl border border-rose-100">
-                            <h4 className="text-[10px] font-bold text-rose-600 uppercase mb-2 flex items-center gap-1">
-                              <TrendingUp size={12} /> 销售渠道
-                            </h4>
-                            <ul className="text-[10px] text-slate-600 space-y-1">
-                              {profile.matchedElements.sales.map((s, i) => <li key={i}>• {s}</li>)}
-                            </ul>
-                          </div>
                         </div>
                       )}
 
