@@ -1339,46 +1339,103 @@ export default function App() {
                       </button>
                     </div>
                   </div>
+                </div>
 
-                  {/* Industry & Enterprise Predicaments Section */}
-                  <div className="mt-8 grid md:grid-cols-2 gap-6">
-                    <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200">
-                      <h4 className="text-sm font-bold text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2">
-                        <Globe size={16} className="text-slate-400" />
-                        行业当前困境 (Industry Challenges)
-                      </h4>
-                      <div className="space-y-3">
-                        {profile.industryChallenges?.map((challenge, i) => (
-                          <div key={i} className="flex gap-3 items-start">
-                            <div className="mt-1.5 w-1.5 h-1.5 rounded-full bg-slate-300 shrink-0" />
-                            <p className="text-sm text-slate-600 leading-relaxed">{challenge}</p>
-                          </div>
-                        ))}
+                {/* Sidebar: Chat & Elements */}
+                <div className="space-y-8">
+                  {/* Growth Chat Dialog - MOVED TO TOP SIDEBAR */}
+                  <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden flex flex-col h-[600px]">
+                    <div className="bg-slate-900 px-6 py-5 text-white flex justify-between items-center">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
+                          <MessageSquare size={16} />
+                        </div>
+                        <div>
+                          <h3 className="font-bold text-sm">成长咨询助手</h3>
+                          <p className="text-[10px] text-slate-400">基于当前画像实时解答</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-1.5 text-[10px] font-bold bg-white/10 px-2 py-1 rounded-full">
+                        <div className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse"></div>
+                        在线
                       </div>
                     </div>
-                    <div className="bg-amber-50/50 p-6 rounded-2xl border border-amber-100">
-                      <h4 className="text-sm font-bold text-amber-600 uppercase tracking-widest mb-4 flex items-center gap-2">
-                        <AlertCircle size={16} />
-                        企业潜在困境 (Future Risks)
-                      </h4>
-                      <div className="space-y-3">
-                        {dynamicRisks.map((risk, i) => (
-                          <div key={i} className="flex gap-3 items-start">
-                            <div className="mt-1.5 w-1.5 h-1.5 rounded-full bg-amber-400 shrink-0" />
-                            <p className="text-sm text-slate-700 font-medium">{risk}</p>
+                    
+                    <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-slate-50/30">
+                      {dashboardMessages.length === 0 && (
+                        <div className="h-full flex flex-col items-center justify-center text-center space-y-3 opacity-60">
+                          <div className="w-12 h-12 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center">
+                            <Sparkles size={24} />
                           </div>
+                          <p className="text-xs font-bold text-slate-900">开始您的成长咨询</p>
+                        </div>
+                      )}
+                      {dashboardMessages.map((msg, i) => (
+                        <div key={i} className={cn(
+                          "flex gap-3 max-w-[90%]",
+                          msg.role === 'user' ? "ml-auto flex-row-reverse" : ""
+                        )}>
+                          <div className={cn(
+                            "w-8 h-8 rounded-lg flex items-center justify-center shrink-0",
+                            msg.role === 'user' ? "bg-slate-200 text-slate-600" : "bg-indigo-600 text-white"
+                          )}>
+                            {msg.role === 'user' ? <Users size={14} /> : <Sparkles size={14} />}
+                          </div>
+                          <div className={cn(
+                            "p-3 rounded-2xl text-xs leading-relaxed shadow-sm",
+                            msg.role === 'user' ? "bg-slate-900 text-white rounded-tr-none" : "bg-white text-slate-700 border border-slate-100 rounded-tl-none"
+                          )}>
+                            {msg.content}
+                          </div>
+                        </div>
+                      ))}
+                      {isDashboardChatLoading && (
+                        <div className="flex gap-3 max-w-[90%]">
+                          <div className="w-8 h-8 rounded-lg bg-indigo-600 text-white flex items-center justify-center shrink-0">
+                            <Sparkles size={14} />
+                          </div>
+                          <div className="p-3 rounded-2xl bg-white border border-slate-100 shadow-sm rounded-tl-none flex items-center gap-2">
+                            <Loader2 className="animate-spin text-indigo-600" size={12} />
+                            <span className="text-[10px] text-slate-400">思考中...</span>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                    
+                    <div className="p-4 bg-white border-t border-slate-100">
+                      <div className="flex gap-2">
+                        <input 
+                          type="text" 
+                          placeholder="提问..."
+                          className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-xs outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
+                          value={dashboardInput}
+                          onChange={(e) => setDashboardInput(e.target.value)}
+                          onKeyDown={(e) => e.key === 'Enter' && handleDashboardChat()}
+                        />
+                        <button 
+                          onClick={handleDashboardChat}
+                          disabled={isDashboardChatLoading || !dashboardInput.trim()}
+                          className="bg-indigo-600 text-white p-2 rounded-xl font-bold hover:bg-indigo-700 transition-all disabled:opacity-50"
+                        >
+                          <Zap size={16} />
+                        </button>
+                      </div>
+                      <div className="mt-3 flex flex-wrap gap-1.5">
+                        {["如何申报专精特新？", "融资路演优化"].map((q) => (
+                          <button 
+                            key={q}
+                            onClick={() => setDashboardInput(q)}
+                            className="text-[9px] font-bold text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 px-2 py-1 rounded-full border border-slate-200 transition-all"
+                          >
+                            {q}
+                          </button>
                         ))}
                       </div>
                     </div>
                   </div>
-                </div>
 
-                {/* Future Elements Matching */}
-                <div className="bg-slate-900 text-white p-8 rounded-3xl shadow-xl">
-                  <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
-                    <Cpu size={24} />
-                    未来要素匹配
-                  </h3>
+                  {/* Future Elements Matching */}
+                  <div className="bg-slate-900 text-white p-8 rounded-3xl shadow-xl">
                   <div className="space-y-6">
                     <div className="p-4 bg-white/5 rounded-2xl border border-white/10">
                       <div className="flex justify-between items-center mb-2">
@@ -1634,102 +1691,6 @@ export default function App() {
                   </div>
                 </div>
 
-                {/* Growth Chat Dialog - NEW FEATURE */}
-                <div className="lg:col-span-3 mt-12">
-                  <div className="bg-white rounded-[2.5rem] border border-slate-200 shadow-xl overflow-hidden flex flex-col h-[500px]">
-                    <div className="bg-indigo-600 px-8 py-6 text-white flex justify-between items-center">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-md">
-                          <MessageSquare size={20} />
-                        </div>
-                        <div>
-                          <h3 className="font-bold text-lg">成长咨询助手</h3>
-                          <p className="text-xs text-indigo-100/80">关于企业成长的一切问题，我都能为您解答</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2 text-xs font-bold bg-white/10 px-3 py-1.5 rounded-full backdrop-blur-md">
-                        <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></div>
-                        在线专家
-                      </div>
-                    </div>
-                    
-                    <div className="flex-1 overflow-y-auto p-8 space-y-6 bg-slate-50/50">
-                      {dashboardMessages.length === 0 && (
-                        <div className="h-full flex flex-col items-center justify-center text-center space-y-4 opacity-60">
-                          <div className="w-16 h-16 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center">
-                            <Sparkles size={32} />
-                          </div>
-                          <div>
-                            <p className="font-bold text-slate-900">开始您的成长咨询</p>
-                            <p className="text-sm text-slate-500 max-w-xs">您可以提问：如何申请专精特新？如何优化融资路演？嘉兴有哪些适合我们的园区？</p>
-                          </div>
-                        </div>
-                      )}
-                      {dashboardMessages.map((msg, i) => (
-                        <div key={i} className={cn(
-                          "flex gap-4 max-w-[85%]",
-                          msg.role === 'user' ? "ml-auto flex-row-reverse" : ""
-                        )}>
-                          <div className={cn(
-                            "w-10 h-10 rounded-xl flex items-center justify-center shrink-0",
-                            msg.role === 'user' ? "bg-slate-900 text-white" : "bg-indigo-600 text-white"
-                          )}>
-                            {msg.role === 'user' ? <Users size={18} /> : <Sparkles size={18} />}
-                          </div>
-                          <div className={cn(
-                            "p-4 rounded-2xl text-sm leading-relaxed shadow-sm",
-                            msg.role === 'user' ? "bg-slate-900 text-white rounded-tr-none" : "bg-white text-slate-700 border border-slate-100 rounded-tl-none"
-                          )}>
-                            {msg.content}
-                          </div>
-                        </div>
-                      ))}
-                      {isDashboardChatLoading && (
-                        <div className="flex gap-4 max-w-[85%]">
-                          <div className="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center shrink-0">
-                            <Sparkles size={18} />
-                          </div>
-                          <div className="p-4 rounded-2xl bg-white border border-slate-100 shadow-sm rounded-tl-none flex items-center gap-2">
-                            <Loader2 className="animate-spin text-indigo-600" size={16} />
-                            <span className="text-sm text-slate-400">正在思考中...</span>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                    
-                    <div className="p-6 bg-white border-t border-slate-100">
-                      <div className="flex gap-3">
-                        <input 
-                          type="text" 
-                          placeholder="输入您想咨询的企业成长问题..."
-                          className="flex-1 bg-slate-50 border border-slate-200 rounded-2xl px-6 py-3 outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
-                          value={dashboardInput}
-                          onChange={(e) => setDashboardInput(e.target.value)}
-                          onKeyDown={(e) => e.key === 'Enter' && handleDashboardChat()}
-                        />
-                        <button 
-                          onClick={handleDashboardChat}
-                          disabled={isDashboardChatLoading || !dashboardInput.trim()}
-                          className="bg-indigo-600 text-white px-6 py-3 rounded-2xl font-bold hover:bg-indigo-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-                        >
-                          发送 <Zap size={18} />
-                        </button>
-                      </div>
-                      <div className="mt-4 flex flex-wrap gap-2">
-                        {["如何申报专精特新？", "近期嘉兴有哪些补贴？", "融资路演怎么优化？"].map((q) => (
-                          <button 
-                            key={q}
-                            onClick={() => {
-                              setDashboardInput(q);
-                            }}
-                            className="text-[10px] font-bold text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 px-3 py-1.5 rounded-full border border-slate-200 transition-all"
-                          >
-                            {q}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
                 </div>
               </div>
             </motion.div>
