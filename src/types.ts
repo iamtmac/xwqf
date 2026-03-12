@@ -8,6 +8,7 @@ export interface EnterpriseProfile {
   fundingStatus: string;
   revenue?: string;
   employeeCount?: string;
+  primaryGoal?: string;
   industryChallenges?: string[];
   growthPrediction?: string;
   matchedElements?: {

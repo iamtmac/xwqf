@@ -186,6 +186,8 @@ export default function App() {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [selectedCase, setSelectedCase] = useState<(SuccessCase & { details: string, path: string[] }) | null>(null);
   const [isEditingDesc, setIsEditingDesc] = useState(false);
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [tempName, setTempName] = useState('');
   const [tempDesc, setTempDesc] = useState('');
   const [dynamicRisks, setDynamicRisks] = useState<string[]>([]);
   const [jiaxingCustomer, setJiaxingCustomer] = useState<{ name: string, reason: string } | null>(null);
@@ -200,6 +202,9 @@ export default function App() {
     { id: 2, type: 'competitor', title: '竞品“旷视科技”发布最新工业质检大模型', time: '2小时前' },
     { id: 3, type: 'market', title: '长三角机器人产业集群专项资金公示', time: '5小时前' },
   ]);
+  const [dashboardMessages, setDashboardMessages] = useState<{role: 'user' | 'ai', content: string}[]>([]);
+  const [dashboardInput, setDashboardInput] = useState('');
+  const [isDashboardChatLoading, setIsDashboardChatLoading] = useState(false);
 
   const [jiaxingOpportunities, setJiaxingOpportunities] = useState([
     { id: 1, industry: '新能源汽车', type: '供应链对接', title: '寻找年产 5000 吨级高纯度铝箔供应商', company: '某嘉兴百强汽配企业', time: '2小时前' },
@@ -225,10 +230,14 @@ export default function App() {
   });
   const LLM_MODEL = import.meta.env.VITE_LLM_MODEL || 'qwen-max';
 
-  const handleSearch = async () => {
-    const query = companyName.trim();
+  const handleSearch = async (overrideName?: string) => {
+    const query = (overrideName || companyName).trim();
     if (!query) return;
     
+    setStep('searching');
+    setIsEditingName(false);
+    if (overrideName) setCompanyName(overrideName);
+
     // 1. Priority: Special handling for 浙江金数湾科技有限公司
     if (query.includes('浙江金数湾') || query.includes('金数湾')) {
       setStep('searching');
@@ -466,6 +475,52 @@ export default function App() {
     }
   };
 
+  const handleDashboardChat = async () => {
+    if (!dashboardInput.trim() || isDashboardChatLoading) return;
+    
+    const userMsg = dashboardInput.trim();
+    setDashboardMessages(prev => [...prev, { role: 'user', content: userMsg }]);
+    setDashboardInput('');
+    setIsDashboardChatLoading(true);
+
+    try {
+      const response = await openai.chat.completions.create({
+        model: LLM_MODEL,
+        messages: [
+          {
+            role: "system",
+            content: `你是一个专业的企业成长专家。你正在为企业“${profile?.name}”提供成长建议。
+            
+            当前企业画像：
+            - 行业：${profile?.industry}
+            - 阶段：${profile?.stage}
+            - 营收：${profile?.revenue}
+            - 规模：${profile?.employeeCount}
+            - 核心目标：${profile?.primaryGoal}
+            
+            页面分析内容：
+            - 潜在风险：${dynamicRisks.join('、')}
+            - 嘉兴商机：${jiaxingCustomer?.name} (${jiaxingCustomer?.reason})
+            - 待办任务：${roadmapTasks.filter(t => t.status !== 'completed').map(t => t.task).join('、')}
+            
+            请基于这些背景信息，回答用户关于企业成长、政策申报、融资规划、风险预警等方面的问题。
+            回答要专业、具体、可落地，并尽可能结合嘉兴本地的政策和资源环境。`
+          },
+          ...dashboardMessages.map(m => ({ role: m.role === 'user' ? 'user' as const : 'assistant' as const, content: m.content })),
+          { role: "user", content: userMsg }
+        ]
+      });
+
+      const aiMsg = response.choices[0].message.content || '抱歉，我暂时无法回答这个问题。';
+      setDashboardMessages(prev => [...prev, { role: 'ai', content: aiMsg }]);
+    } catch (error) {
+      console.error("Dashboard chat failed:", error);
+      setDashboardMessages(prev => [...prev, { role: 'ai', content: '咨询服务暂时繁忙，请稍后再试。' }]);
+    } finally {
+      setIsDashboardChatLoading(false);
+    }
+  };
+
   const startAnalysis = () => {
     setIsAnalyzing(true);
     
@@ -559,7 +614,7 @@ export default function App() {
                     onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
                   />
                   <button 
-                    onClick={handleSearch}
+                    onClick={() => handleSearch()}
                     className="bg-indigo-600 text-white px-8 py-3 rounded-xl font-semibold hover:bg-indigo-700 transition-all flex items-center gap-2"
                   >
                     AI 咨询 <Zap size={18} />
@@ -813,170 +868,215 @@ export default function App() {
               key="confirming"
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="max-w-4xl mx-auto"
+              className="max-w-5xl mx-auto"
             >
-              <button 
-                onClick={() => setStep('landing')}
-                className="mb-6 flex items-center gap-2 text-slate-500 hover:text-indigo-600 transition-colors font-medium"
-              >
-                <ArrowLeft size={18} /> 返回重新搜索
-              </button>
-              <div className="bg-white rounded-3xl shadow-2xl border border-slate-200 overflow-hidden">
-                <div className="bg-indigo-600 p-8 text-white">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <h2 className="text-3xl font-bold mb-2">{profile.name}</h2>
-                      <div className="flex gap-2">
-                        <span className="bg-white/20 px-3 py-1 rounded-full text-xs font-medium backdrop-blur-sm">
-                          {profile.industry}
-                        </span>
-                        <span className="bg-white/20 px-3 py-1 rounded-full text-xs font-medium backdrop-blur-sm">
-                          {profile.stage}
-                        </span>
+              <div className="flex justify-between items-center mb-8">
+                <button 
+                  onClick={() => setStep('landing')}
+                  className="flex items-center gap-2 text-slate-500 hover:text-indigo-600 transition-colors font-medium"
+                >
+                  <ArrowLeft size={18} /> 返回重新搜索
+                </button>
+                <div className="flex items-center gap-2 text-xs font-bold text-indigo-600 bg-indigo-50 px-4 py-2 rounded-full">
+                  <Sparkles size={14} />
+                  AI 已为您初步生成画像，请核实关键信息以确保预测准确
+                </div>
+              </div>
+
+              <div className="grid lg:grid-cols-3 gap-8">
+                {/* Left Column: Core Identity */}
+                <div className="lg:col-span-2 space-y-6">
+                  {/* Company Name Verification */}
+                  <div className="bg-white rounded-3xl shadow-sm border border-slate-200 p-8">
+                    <div className="flex justify-between items-start mb-6">
+                      <div>
+                        <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-1">企业主体名称</h3>
+                        {isEditingName ? (
+                          <div className="flex gap-2 mt-2">
+                            <input 
+                              type="text" 
+                              value={tempName}
+                              onChange={(e) => setTempName(e.target.value)}
+                              className="flex-1 px-4 py-2 bg-slate-50 border border-indigo-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none"
+                            />
+                            <button 
+                              onClick={() => handleSearch(tempName)}
+                              className="bg-indigo-600 text-white px-4 py-2 rounded-xl text-sm font-bold hover:bg-indigo-700 transition-all"
+                            >
+                              重新生成
+                            </button>
+                            <button 
+                              onClick={() => setIsEditingName(false)}
+                              className="px-4 py-2 text-slate-400 hover:text-slate-600 text-sm font-bold"
+                            >
+                              取消
+                            </button>
+                          </div>
+                        ) : (
+                          <h2 className="text-3xl font-bold text-slate-900">{profile.name}</h2>
+                        )}
                       </div>
+                      {!isEditingName && (
+                        <button 
+                          onClick={() => {
+                            setTempName(profile.name);
+                            setIsEditingName(true);
+                          }}
+                          className="text-indigo-600 text-xs font-bold flex items-center gap-1 hover:underline"
+                        >
+                          <Edit3 size={14} /> 修改名称
+                        </button>
+                      )}
                     </div>
-                    <div className="bg-white/10 p-3 rounded-2xl backdrop-blur-md border border-white/20">
-                      <CheckCircle2 size={24} />
+                    {isEditingName && (
+                      <div className="p-4 bg-amber-50 rounded-2xl border border-amber-100 flex gap-3 items-start">
+                        <AlertCircle className="text-amber-600 shrink-0" size={18} />
+                        <p className="text-xs text-amber-700 leading-relaxed">
+                          提示：修改企业名称后，系统将清除当前所有分析数据并基于新名称重新进行全网检索与推演。
+                        </p>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Growth Conditions Verification - SELECTION BASED */}
+                  <div className="bg-white rounded-3xl shadow-sm border border-slate-200 p-8">
+                    <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-8">核实成长路径关键参数</h3>
+                    
+                    <div className="grid md:grid-cols-2 gap-8">
+                      {/* Industry Selection */}
+                      <div className="space-y-3">
+                        <label className="text-sm font-bold text-slate-700 flex items-center gap-2">
+                          <Globe size={16} className="text-indigo-500" /> 所属行业领域
+                        </label>
+                        <select 
+                          value={profile.industry}
+                          onChange={(e) => setProfile(prev => prev ? { ...prev, industry: e.target.value } : null)}
+                          className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-indigo-500 outline-none text-sm"
+                        >
+                          {["大数据/人工智能", "生物医药", "新能源", "智能制造", "集成电路", "科技金融", "现代服务业", "其他"].map(opt => (
+                            <option key={opt} value={opt}>{opt}</option>
+                          ))}
+                        </select>
+                      </div>
+
+                      {/* Stage Selection */}
+                      <div className="space-y-3">
+                        <label className="text-sm font-bold text-slate-700 flex items-center gap-2">
+                          <TrendingUp size={16} className="text-indigo-500" /> 当前发展阶段
+                        </label>
+                        <select 
+                          value={profile.stage}
+                          onChange={(e) => setProfile(prev => prev ? { ...prev, stage: e.target.value as any } : null)}
+                          className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-indigo-500 outline-none text-sm"
+                        >
+                          {["种子期", "初创期", "成长期", "成熟期"].map(opt => (
+                            <option key={opt} value={opt}>{opt}</option>
+                          ))}
+                        </select>
+                      </div>
+
+                      {/* Revenue Selection */}
+                      <div className="space-y-3">
+                        <label className="text-sm font-bold text-slate-700 flex items-center gap-2">
+                          <Coins size={16} className="text-indigo-500" /> 年度营收规模
+                        </label>
+                        <select 
+                          value={profile.revenue}
+                          onChange={(e) => setProfile(prev => prev ? { ...prev, revenue: e.target.value } : null)}
+                          className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-indigo-500 outline-none text-sm"
+                        >
+                          {["< 100万", "100万 - 500万", "500万 - 2000万", "2000万 - 1亿", "> 1亿"].map(opt => (
+                            <option key={opt} value={opt}>{opt}</option>
+                          ))}
+                        </select>
+                      </div>
+
+                      {/* Employee Selection */}
+                      <div className="space-y-3">
+                        <label className="text-sm font-bold text-slate-700 flex items-center gap-2">
+                          <Users size={16} className="text-indigo-500" /> 人员团队规模
+                        </label>
+                        <select 
+                          value={profile.employeeCount}
+                          onChange={(e) => setProfile(prev => prev ? { ...prev, employeeCount: e.target.value } : null)}
+                          className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-indigo-500 outline-none text-sm"
+                        >
+                          {["< 20人", "20 - 50人", "50 - 200人", "200 - 500人", "> 500人"].map(opt => (
+                            <option key={opt} value={opt}>{opt}</option>
+                          ))}
+                        </select>
+                      </div>
+
+                      {/* Primary Goal Selection */}
+                      <div className="space-y-3 md:col-span-2">
+                        <label className="text-sm font-bold text-slate-700 flex items-center gap-2">
+                          <Rocket size={16} className="text-indigo-500" /> 近期核心成长目标 (影响预测重心)
+                        </label>
+                        <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+                          {["融资扩张", "政策申报", "技术研发", "市场开拓", "上市准备"].map(opt => (
+                            <button 
+                              key={opt}
+                              onClick={() => setProfile(prev => prev ? { ...prev, primaryGoal: opt } : null)}
+                              className={cn(
+                                "px-4 py-2 rounded-xl text-xs font-bold border transition-all",
+                                profile.primaryGoal === opt 
+                                  ? "bg-indigo-600 border-indigo-600 text-white shadow-md shadow-indigo-200" 
+                                  : "bg-white border-slate-200 text-slate-500 hover:border-indigo-300 hover:text-indigo-600"
+                              )}
+                            >
+                              {opt}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
-                
-                <div className="p-8 grid md:grid-cols-2 gap-12">
-                  <div>
-                    <div className="flex justify-between items-center mb-4">
-                      <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider">企业画像核实</h3>
-                      <button 
-                        onClick={() => {
-                          if (isEditingDesc) {
-                            setProfile(prev => prev ? { ...prev, description: tempDesc } : null);
-                          } else {
-                            setTempDesc(profile.description);
-                          }
-                          setIsEditingDesc(!isEditingDesc);
-                        }}
-                        className="text-indigo-600 text-xs font-bold flex items-center gap-1 hover:underline"
-                      >
-                        {isEditingDesc ? <><CheckCircle2 size={14} /> 保存修改</> : <><Edit3 size={14} /> 修改信息</>}
-                      </button>
-                    </div>
-                    {isEditingDesc ? (
-                      <textarea 
-                        value={tempDesc}
-                        onChange={(e) => setTempDesc(e.target.value)}
-                        className="w-full h-32 p-4 bg-slate-50 border border-indigo-200 rounded-2xl text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 mb-6"
-                      />
-                    ) : (
-                      <p className="text-slate-700 leading-relaxed mb-6">
-                        {profile.description}
-                      </p>
-                    )}
-                    
-                    <div className="space-y-4">
-                      {profile.growthPrediction && (
-                        <div className="bg-indigo-50 p-6 rounded-2xl border border-indigo-100 mb-6">
-                          <h3 className="text-sm font-bold text-indigo-600 uppercase tracking-wider mb-3 flex items-center gap-2">
-                            <TrendingUp size={16} /> AI 成长预测 (2026-2030)
-                          </h3>
-                          <p className="text-sm text-slate-700 leading-relaxed italic">
-                            {profile.growthPrediction}
-                          </p>
-                        </div>
-                      )}
 
-                      <div className="grid grid-cols-2 gap-4 mb-4">
-                        {profile.revenue && (
-                          <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
-                            <div className="text-[10px] font-bold text-slate-400 uppercase">年度营收</div>
-                            <div className="text-sm font-bold text-slate-700">{profile.revenue}</div>
-                          </div>
-                        )}
-                        {profile.employeeCount && (
-                          <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
-                            <div className="text-[10px] font-bold text-slate-400 uppercase">人员规模</div>
-                            <div className="text-sm font-bold text-slate-700">{profile.employeeCount}</div>
-                          </div>
-                        )}
-                      </div>
-                      <div>
-                        <span className="text-xs font-bold text-slate-400 uppercase">核心技术</span>
-                        <div className="flex flex-wrap gap-2 mt-2">
-                          {profile.keyTech.map(tech => (
-                            <span key={tech} className="bg-indigo-50 text-indigo-700 px-3 py-1 rounded-lg text-sm font-medium border border-indigo-100">
-                              {tech}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                      <div>
-                        <span className="text-xs font-bold text-slate-400 uppercase">行业竞品</span>
-                        <div className="flex flex-wrap gap-2 mt-2">
-                          {profile.competitors.map(comp => (
-                            <span key={comp} className="bg-slate-100 text-slate-600 px-3 py-1 rounded-lg text-sm font-medium">
-                              {comp}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="mt-10 pt-8 border-t border-slate-100">
-                      <h4 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4">补充材料与介绍</h4>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="border-2 border-dashed border-slate-200 rounded-2xl p-4 flex flex-col items-center justify-center gap-2 hover:border-indigo-300 hover:bg-indigo-50/30 transition-all cursor-pointer group">
-                          <div className="w-10 h-10 bg-slate-100 rounded-full flex items-center justify-center group-hover:bg-indigo-100 transition-colors">
-                            <Upload size={18} className="text-slate-400 group-hover:text-indigo-600" />
-                          </div>
-                          <span className="text-xs font-bold text-slate-500 group-hover:text-indigo-600">上传商业计划书</span>
-                        </div>
-                        <div className="border-2 border-dashed border-slate-200 rounded-2xl p-4 flex flex-col items-center justify-center gap-2 hover:border-indigo-300 hover:bg-indigo-50/30 transition-all cursor-pointer group">
-                          <div className="w-10 h-10 bg-slate-100 rounded-full flex items-center justify-center group-hover:bg-indigo-100 transition-colors">
-                            <Plus size={18} className="text-slate-400 group-hover:text-indigo-600" />
-                          </div>
-                          <span className="text-xs font-bold text-slate-500 group-hover:text-indigo-600">添加更多介绍</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="bg-slate-50 rounded-2xl p-6 border border-slate-100">
-                    <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
-                      <TrendingUp className="text-indigo-600" size={20} />
-                      初步诊断建议
+                {/* Right Column: Summary & Action */}
+                <div className="space-y-6">
+                  <div className="bg-slate-900 text-white rounded-3xl p-8 shadow-xl sticky top-24">
+                    <h3 className="text-lg font-bold mb-6 flex items-center gap-2">
+                      <Sparkles className="text-indigo-400" size={20} />
+                      诊断摘要
                     </h3>
-                    <ul className="space-y-4">
-                      <li className="flex gap-3">
-                        <div className="w-6 h-6 rounded-full bg-green-100 text-green-600 flex items-center justify-center shrink-0">
-                          <CheckCircle2 size={14} />
-                        </div>
-                        <p className="text-sm text-slate-600">您的技术方向与当前“智能制造”专项补贴高度契合。</p>
-                      </li>
-                      <li className="flex gap-3">
-                        <div className="w-6 h-6 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center shrink-0">
-                          <AlertCircle size={14} />
-                        </div>
-                        <p className="text-sm text-slate-600">检测到同行业近期有大规模数据泄露事件，建议升级数据安全等级。</p>
-                      </li>
-                      <li className="flex gap-3">
-                        <div className="w-6 h-6 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center shrink-0">
-                          <Rocket size={14} />
-                        </div>
-                        <p className="text-sm text-slate-600">当前融资进度落后于同类竞品，建议开启新一轮融资规划。</p>
-                      </li>
-                    </ul>
-                    
+                    <div className="space-y-6 mb-8">
+                      <div className="flex justify-between items-center py-3 border-b border-white/10">
+                        <span className="text-sm text-slate-400">匹配精准度</span>
+                        <span className="text-sm font-bold text-emerald-400">92%</span>
+                      </div>
+                      <div className="flex justify-between items-center py-3 border-b border-white/10">
+                        <span className="text-sm text-slate-400">建议关注要素</span>
+                        <span className="text-sm font-bold text-indigo-300">政策、人才</span>
+                      </div>
+                      <div className="pt-4">
+                        <p className="text-xs text-slate-400 leading-relaxed">
+                          基于您核实的信息，小湾 AI 将为您生成包含未来 10 年里程碑、潜在风险预警及嘉兴本地资源对接的深度报告。
+                        </p>
+                      </div>
+                    </div>
+
                     <button 
                       onClick={startAnalysis}
-                      disabled={isAnalyzing}
-                      className="w-full mt-8 bg-slate-900 text-white py-4 rounded-xl font-bold hover:bg-slate-800 transition-all flex items-center justify-center gap-2 shadow-lg shadow-slate-200"
+                      disabled={isAnalyzing || isEditingName}
+                      className="w-full bg-white text-slate-900 py-4 rounded-2xl font-bold hover:bg-indigo-50 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
                     >
                       {isAnalyzing ? (
-                        <><Loader2 className="animate-spin" size={20} /> 正在生成全生命周期规划...</>
+                        <><Loader2 className="animate-spin" size={20} /> 正在生成规划...</>
                       ) : (
-                        "确认信息并生成智能规划"
+                        <>开启智能导航 <ArrowRight size={18} /></>
                       )}
                     </button>
-                    <p className="text-[10px] text-slate-400 text-center mt-4">
-                      * 基于小湾企服“智能画像引擎”自动生成，数据安全受“小湾安全盾”保护
+                    <p className="text-[10px] text-slate-500 text-center mt-4">
+                      点击即代表您同意小湾企服的数据处理协议
+                    </p>
+                  </div>
+
+                  {/* Quick Tips */}
+                  <div className="bg-indigo-50 rounded-3xl p-6 border border-indigo-100">
+                    <h4 className="text-xs font-bold text-indigo-600 uppercase tracking-widest mb-3">小贴士</h4>
+                    <p className="text-xs text-indigo-900/70 leading-relaxed">
+                      核实信息越准确，AI 生成的成长路径预测就越贴合您的实际经营状况。
                     </p>
                   </div>
                 </div>
@@ -1529,6 +1629,104 @@ export default function App() {
                           <span className="w-1 h-1 bg-slate-300 rounded-full"></span>
                           <span>点击查看路径</span>
                         </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Growth Chat Dialog - NEW FEATURE */}
+                <div className="lg:col-span-3 mt-12">
+                  <div className="bg-white rounded-[2.5rem] border border-slate-200 shadow-xl overflow-hidden flex flex-col h-[500px]">
+                    <div className="bg-indigo-600 px-8 py-6 text-white flex justify-between items-center">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-md">
+                          <MessageSquare size={20} />
+                        </div>
+                        <div>
+                          <h3 className="font-bold text-lg">成长咨询助手</h3>
+                          <p className="text-xs text-indigo-100/80">关于企业成长的一切问题，我都能为您解答</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2 text-xs font-bold bg-white/10 px-3 py-1.5 rounded-full backdrop-blur-md">
+                        <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></div>
+                        在线专家
+                      </div>
+                    </div>
+                    
+                    <div className="flex-1 overflow-y-auto p-8 space-y-6 bg-slate-50/50">
+                      {dashboardMessages.length === 0 && (
+                        <div className="h-full flex flex-col items-center justify-center text-center space-y-4 opacity-60">
+                          <div className="w-16 h-16 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center">
+                            <Sparkles size={32} />
+                          </div>
+                          <div>
+                            <p className="font-bold text-slate-900">开始您的成长咨询</p>
+                            <p className="text-sm text-slate-500 max-w-xs">您可以提问：如何申请专精特新？如何优化融资路演？嘉兴有哪些适合我们的园区？</p>
+                          </div>
+                        </div>
+                      )}
+                      {dashboardMessages.map((msg, i) => (
+                        <div key={i} className={cn(
+                          "flex gap-4 max-w-[85%]",
+                          msg.role === 'user' ? "ml-auto flex-row-reverse" : ""
+                        )}>
+                          <div className={cn(
+                            "w-10 h-10 rounded-xl flex items-center justify-center shrink-0",
+                            msg.role === 'user' ? "bg-slate-900 text-white" : "bg-indigo-600 text-white"
+                          )}>
+                            {msg.role === 'user' ? <Users size={18} /> : <Sparkles size={18} />}
+                          </div>
+                          <div className={cn(
+                            "p-4 rounded-2xl text-sm leading-relaxed shadow-sm",
+                            msg.role === 'user' ? "bg-slate-900 text-white rounded-tr-none" : "bg-white text-slate-700 border border-slate-100 rounded-tl-none"
+                          )}>
+                            {msg.content}
+                          </div>
+                        </div>
+                      ))}
+                      {isDashboardChatLoading && (
+                        <div className="flex gap-4 max-w-[85%]">
+                          <div className="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center shrink-0">
+                            <Sparkles size={18} />
+                          </div>
+                          <div className="p-4 rounded-2xl bg-white border border-slate-100 shadow-sm rounded-tl-none flex items-center gap-2">
+                            <Loader2 className="animate-spin text-indigo-600" size={16} />
+                            <span className="text-sm text-slate-400">正在思考中...</span>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                    
+                    <div className="p-6 bg-white border-t border-slate-100">
+                      <div className="flex gap-3">
+                        <input 
+                          type="text" 
+                          placeholder="输入您想咨询的企业成长问题..."
+                          className="flex-1 bg-slate-50 border border-slate-200 rounded-2xl px-6 py-3 outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
+                          value={dashboardInput}
+                          onChange={(e) => setDashboardInput(e.target.value)}
+                          onKeyDown={(e) => e.key === 'Enter' && handleDashboardChat()}
+                        />
+                        <button 
+                          onClick={handleDashboardChat}
+                          disabled={isDashboardChatLoading || !dashboardInput.trim()}
+                          className="bg-indigo-600 text-white px-6 py-3 rounded-2xl font-bold hover:bg-indigo-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                        >
+                          发送 <Zap size={18} />
+                        </button>
+                      </div>
+                      <div className="mt-4 flex flex-wrap gap-2">
+                        {["如何申报专精特新？", "近期嘉兴有哪些补贴？", "融资路演怎么优化？"].map((q) => (
+                          <button 
+                            key={q}
+                            onClick={() => {
+                              setDashboardInput(q);
+                            }}
+                            className="text-[10px] font-bold text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 px-3 py-1.5 rounded-full border border-slate-200 transition-all"
+                          >
+                            {q}
+                          </button>
+                        ))}
                       </div>
                     </div>
                   </div>
