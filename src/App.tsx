@@ -30,7 +30,9 @@ import {
   MessageSquare,
   Coins,
   UserPlus,
-  Zap
+  Zap,
+  Map,
+  Check
 } from 'lucide-react';
 import { 
   LineChart, 
@@ -1289,62 +1291,107 @@ export default function App() {
                     <div className="ml-auto italic">* 成长指数基于营收、人才规模及政策匹配度综合计算</div>
                   </div>
 
-                  {/* Growth Roadmap - NEW STICKINESS FEATURE */}
-                  <div className="mt-10">
-                    <div className="flex justify-between items-end mb-6">
+                  {/* Growth Roadmap - Redesigned as a visual path */}
+                  <div className="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm mt-10">
+                    <div className="flex justify-between items-end mb-10">
                       <div>
-                        <h4 className="text-lg font-bold text-slate-900 flex items-center gap-2">
-                          <CheckCircle2 className="text-emerald-500" size={20} />
+                        <h3 className="text-xl font-bold flex items-center gap-2 mb-1">
+                          <Map className="text-indigo-600" size={24} />
                           企业成长路线图
-                        </h4>
-                        <p className="text-xs text-slate-500">基于 AI 预测为您定制的行动清单，完成度越高，预测准确率越高</p>
+                        </h3>
+                        <p className="text-xs text-slate-500">基于 AI 预测为您定制的行动路径，每一步都是成长的里程碑</p>
                       </div>
                       <div className="text-right">
-                        <span className="text-2xl font-black text-indigo-600">25%</span>
-                        <span className="text-[10px] font-bold text-slate-400 block uppercase">当前完成度</span>
+                        <div className="flex items-center gap-2 justify-end mb-1">
+                          <span className="text-3xl font-black text-indigo-600">25%</span>
+                          <div className="w-24 h-2 bg-slate-100 rounded-full overflow-hidden">
+                            <div className="h-full bg-indigo-600" style={{ width: '25%' }}></div>
+                          </div>
+                        </div>
+                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">整体完成进度</span>
                       </div>
                     </div>
-                    <div className="grid md:grid-cols-2 gap-4">
-                      {roadmapTasks.map((task) => (
+
+                    <div className="relative pl-8 space-y-0">
+                      {/* Vertical Path Line */}
+                      <div className="absolute left-[11px] top-2 bottom-2 w-0.5 bg-slate-100">
+                        <div className="absolute top-0 left-0 w-full bg-indigo-600 transition-all duration-1000" style={{ height: '25%' }}></div>
+                      </div>
+
+                      {roadmapTasks.map((task, index) => (
                         <div 
                           key={task.id}
                           onClick={() => toggleTask(task.id)}
-                          className={cn(
-                            "p-4 rounded-2xl border transition-all cursor-pointer flex items-center gap-3",
-                            task.status === 'completed' ? "bg-emerald-50 border-emerald-100" : 
-                            task.status === 'in-progress' ? "bg-indigo-50 border-indigo-100 ring-2 ring-indigo-600/20" :
-                            "bg-white border-slate-200 hover:border-indigo-300"
-                          )}
+                          className="relative pb-8 last:pb-0 group cursor-pointer"
                         >
+                          {/* Node Dot */}
                           <div className={cn(
-                            "w-6 h-6 rounded-full flex items-center justify-center shrink-0",
-                            task.status === 'completed' ? "bg-emerald-500 text-white" : 
-                            task.status === 'in-progress' ? "bg-indigo-600 text-white animate-pulse" :
-                            "border-2 border-slate-200 text-slate-200"
+                            "absolute left-[-29px] top-1 w-6 h-6 rounded-full border-4 border-white shadow-sm flex items-center justify-center z-10 transition-all",
+                            task.status === 'completed' ? "bg-emerald-500 scale-110" : 
+                            task.status === 'in-progress' ? "bg-indigo-600 animate-pulse scale-125" :
+                            "bg-slate-200"
                           )}>
-                            {task.status === 'completed' ? <CheckCircle2 size={14} /> : <div className="w-1.5 h-1.5 rounded-full bg-current" />}
+                            {task.status === 'completed' && <Check size={12} className="text-white" />}
+                            {task.status === 'in-progress' && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
                           </div>
-                          <div className="flex-1">
-                            <div className="flex justify-between items-start">
-                              <span className={cn("text-sm font-bold", task.status === 'completed' ? "text-emerald-900" : "text-slate-700")}>
-                                {task.task}
-                              </span>
-                              <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-100 text-slate-500 font-medium">{task.category}</span>
+
+                          <div className={cn(
+                            "p-5 rounded-2xl border transition-all",
+                            task.status === 'completed' ? "bg-emerald-50/50 border-emerald-100" : 
+                            task.status === 'in-progress' ? "bg-white border-indigo-200 shadow-md -translate-y-1" :
+                            "bg-white border-slate-100 hover:border-indigo-200"
+                          )}>
+                            <div className="flex justify-between items-start gap-4">
+                              <div>
+                                <div className="flex items-center gap-2 mb-1">
+                                  <span className={cn(
+                                    "text-[9px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider",
+                                    task.category === '财务' ? "bg-blue-100 text-blue-600" :
+                                    task.category === '技术' ? "bg-purple-100 text-purple-600" :
+                                    task.category === '人才' ? "bg-orange-100 text-orange-600" :
+                                    "bg-indigo-100 text-indigo-600"
+                                  )}>
+                                    {task.category}
+                                  </span>
+                                  <span className="text-[9px] text-slate-400 font-medium">阶段 {index + 1}</span>
+                                </div>
+                                <h4 className={cn(
+                                  "text-sm font-bold",
+                                  task.status === 'completed' ? "text-emerald-900 line-through opacity-60" : "text-slate-800"
+                                )}>
+                                  {task.task}
+                                </h4>
+                              </div>
+                              <div className="shrink-0">
+                                {task.status === 'completed' ? (
+                                  <span className="text-[10px] font-bold text-emerald-600 bg-emerald-100 px-2 py-1 rounded-lg">已达成</span>
+                                ) : task.status === 'in-progress' ? (
+                                  <span className="text-[10px] font-bold text-indigo-600 bg-indigo-50 px-2 py-1 rounded-lg">进行中</span>
+                                ) : (
+                                  <span className="text-[10px] font-bold text-slate-400 bg-slate-50 px-2 py-1 rounded-lg">待启动</span>
+                                )}
+                              </div>
                             </div>
                           </div>
                         </div>
                       ))}
-                      <button className="p-4 rounded-2xl border border-dashed border-slate-300 text-slate-400 text-sm font-medium hover:border-indigo-400 hover:text-indigo-600 transition-all flex items-center justify-center gap-2">
-                        <Plus size={16} /> 添加自定义任务
-                      </button>
+
+                      <div className="relative group">
+                        <div className="absolute left-[-29px] top-1 w-6 h-6 rounded-full border-4 border-white bg-slate-50 flex items-center justify-center z-10">
+                          <Plus size={12} className="text-slate-400" />
+                        </div>
+                        <button className="w-full p-4 rounded-2xl border border-dashed border-slate-200 text-slate-400 text-xs font-bold hover:border-indigo-400 hover:text-indigo-600 hover:bg-indigo-50/30 transition-all text-left pl-5">
+                          添加下一阶段目标...
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
 
                 {/* Sidebar: Chat & Elements */}
                 <div className="space-y-8">
-                  {/* Growth Chat Dialog - MOVED TO TOP SIDEBAR */}
-                  <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden flex flex-col h-[600px]">
+                  {/* Growth Chat Dialog - Enhanced with preset elements */}
+                  <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden flex flex-col h-[700px]">
                     <div className="bg-slate-900 px-6 py-5 text-white flex justify-between items-center">
                       <div className="flex items-center gap-3">
                         <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
@@ -1363,11 +1410,72 @@ export default function App() {
                     
                     <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-slate-50/30">
                       {dashboardMessages.length === 0 && (
-                        <div className="h-full flex flex-col items-center justify-center text-center space-y-3 opacity-60">
-                          <div className="w-12 h-12 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center">
-                            <Sparkles size={24} />
+                        <div className="space-y-6">
+                          <div className="flex flex-col items-center justify-center text-center space-y-3 py-6">
+                            <div className="w-12 h-12 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center">
+                              <Sparkles size={24} />
+                            </div>
+                            <div>
+                              <p className="text-sm font-bold text-slate-900">您好！我是您的小湾成长助手</p>
+                              <p className="text-[10px] text-slate-500 mt-1">您可以直接提问，或查看下方的 AI 推荐要素</p>
+                            </div>
                           </div>
-                          <p className="text-xs font-bold text-slate-900">开始您的成长咨询</p>
+
+                          {/* Integrated Recommended Elements */}
+                          <div className="space-y-3">
+                            <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">AI 推荐要素</h4>
+                            <div className="grid gap-3">
+                              <div 
+                                onClick={() => setDashboardInput("如何对接高级算法工程师人才库？")}
+                                className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm hover:border-indigo-300 transition-all cursor-pointer group"
+                              >
+                                <div className="flex justify-between items-start mb-2">
+                                  <span className="text-[10px] font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded">人才缺口</span>
+                                  <ChevronRight size={14} className="text-slate-300 group-hover:text-indigo-600 transition-colors" />
+                                </div>
+                                <div className="text-xs font-bold text-slate-800">高级算法工程师 (3名)</div>
+                                <p className="text-[10px] text-slate-500 mt-1">匹配小湾人才库，已锁定 12 名候选人</p>
+                              </div>
+
+                              <div 
+                                onClick={() => setDashboardInput("帮我分析一下高新技术企业认定申报条件")}
+                                className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm hover:border-orange-300 transition-all cursor-pointer group"
+                              >
+                                <div className="flex justify-between items-start mb-2">
+                                  <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded">政策匹配</span>
+                                  <ChevronRight size={14} className="text-slate-300 group-hover:text-emerald-600 transition-colors" />
+                                </div>
+                                <div className="text-xs font-bold text-slate-800">高新技术企业认定</div>
+                                <p className="text-[10px] text-slate-500 mt-1">预计可减免税收 ¥200k/年</p>
+                              </div>
+
+                              <div 
+                                onClick={() => setDashboardInput("推荐一些适合研发团队的办公空间")}
+                                className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm hover:border-blue-300 transition-all cursor-pointer group"
+                              >
+                                <div className="flex justify-between items-start mb-2">
+                                  <span className="text-[10px] font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded">办公空间</span>
+                                  <ChevronRight size={14} className="text-slate-300 group-hover:text-blue-600 transition-colors" />
+                                </div>
+                                <div className="text-xs font-bold text-slate-800">小湾科创园 B座 500㎡</div>
+                                <p className="text-[10px] text-slate-500 mt-1">预计 8 月份当前空间将达到饱和</p>
+                              </div>
+
+                              {jiaxingCustomer && (
+                                <div 
+                                  onClick={() => setDashboardInput(`如何与 ${jiaxingCustomer.name} 进行供应链对接？`)}
+                                  className="bg-indigo-50 p-4 rounded-2xl border border-indigo-100 shadow-sm hover:border-indigo-300 transition-all cursor-pointer group"
+                                >
+                                  <div className="flex justify-between items-start mb-2">
+                                    <span className="text-[10px] font-bold text-indigo-600 bg-white px-2 py-0.5 rounded">嘉兴潜在商机</span>
+                                    <ChevronRight size={14} className="text-indigo-300 group-hover:text-indigo-600 transition-colors" />
+                                  </div>
+                                  <div className="text-xs font-bold text-indigo-900">{jiaxingCustomer.name}</div>
+                                  <p className="text-[10px] text-indigo-700/70 mt-1">{jiaxingCustomer.reason}</p>
+                                </div>
+                              )}
+                            </div>
+                          </div>
                         </div>
                       )}
                       {dashboardMessages.map((msg, i) => (
@@ -1421,7 +1529,7 @@ export default function App() {
                         </button>
                       </div>
                       <div className="mt-3 flex flex-wrap gap-1.5">
-                        {["如何申报专精特新？", "融资路演优化"].map((q) => (
+                        {["如何申报专精特新？", "融资路演优化", "嘉兴人才政策"].map((q) => (
                           <button 
                             key={q}
                             onClick={() => setDashboardInput(q)}
@@ -1434,49 +1542,7 @@ export default function App() {
                     </div>
                   </div>
 
-                  {/* Future Elements Matching */}
-                  <div className="bg-slate-900 text-white p-8 rounded-3xl shadow-xl">
-                  <div className="space-y-6">
-                    <div className="p-4 bg-white/5 rounded-2xl border border-white/10">
-                      <div className="flex justify-between items-center mb-2">
-                        <span className="text-sm font-medium text-slate-400">人才缺口</span>
-                        <span className="text-xs bg-indigo-500 px-2 py-0.5 rounded">高匹配</span>
-                      </div>
-                      <div className="text-lg font-bold">高级算法工程师 (3名)</div>
-                      <p className="text-xs text-slate-500 mt-1">匹配小湾人才库，已锁定 12 名候选人</p>
-                    </div>
-                    <div className="p-4 bg-white/5 rounded-2xl border border-white/10 relative overflow-hidden group">
-                      <div className="flex justify-between items-center mb-2">
-                        <span className="text-sm font-medium text-slate-400">政策匹配</span>
-                        <span className="text-xs bg-emerald-500 px-2 py-0.5 rounded">可申请</span>
-                      </div>
-                      <div className="text-lg font-bold">高新技术企业认定</div>
-                      <p className="text-xs text-slate-500 mt-1">预计可减免税收 ¥200k/年</p>
-                      
-                      <button className="mt-3 w-full py-1.5 bg-indigo-600/20 hover:bg-indigo-600/40 text-indigo-300 text-[10px] font-bold rounded-lg transition-all">
-                        查看申报成功率分析
-                      </button>
-                    </div>
-                    <div className="p-4 bg-white/5 rounded-2xl border border-white/10">
-                      <div className="flex justify-between items-center mb-2">
-                        <span className="text-sm font-medium text-slate-400">办公空间</span>
-                        <span className="text-xs bg-blue-500 px-2 py-0.5 rounded">扩容预警</span>
-                      </div>
-                      <div className="text-lg font-bold">小湾科创园 B座 500㎡</div>
-                      <p className="text-xs text-slate-500 mt-1">预计 8 月份当前空间将达到饱和</p>
-                    </div>
-                    {jiaxingCustomer && (
-                      <div className="p-4 bg-indigo-500/10 rounded-2xl border border-indigo-500/20">
-                        <div className="flex justify-between items-center mb-2">
-                          <span className="text-sm font-medium text-indigo-300">嘉兴潜在商机</span>
-                          <span className="text-xs bg-indigo-600 px-2 py-0.5 rounded">本地推荐</span>
-                        </div>
-                        <div className="text-lg font-bold text-indigo-200">{jiaxingCustomer.name}</div>
-                        <p className="text-xs text-slate-400 mt-1 leading-relaxed">
-                          {jiaxingCustomer.reason}
-                        </p>
-                      </div>
-                    )}
+                  {/* Future Elements Matching - REMOVED AS IT IS NOW INTEGRATED INTO CHAT */}
 
                     {/* Join Us Card */}
                     <div className="mt-8 p-6 bg-gradient-to-br from-indigo-600/20 to-purple-600/20 rounded-2xl border border-indigo-500/30 border-dashed group cursor-pointer hover:bg-indigo-600/30 transition-all">
@@ -1493,10 +1559,8 @@ export default function App() {
                         立即入驻
                       </button>
                     </div>
-                  </div>
-                </div>
 
-                {/* Success Cases - MOVED TO SIDEBAR */}
+                    {/* Success Cases - MOVED TO SIDEBAR */}
                     <div className="mt-8 pt-8 border-t border-white/10">
                       <div className="flex justify-between items-center mb-6">
                         <h3 className="text-sm font-bold text-white uppercase tracking-widest">同赛道对标案例</h3>
