@@ -940,7 +940,7 @@ export default function App() {
 
                   {/* Growth Conditions Verification - SELECTION BASED */}
                   <div className="bg-white rounded-3xl shadow-sm border border-slate-200 p-8">
-                    <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-8">核实成长路径关键参数</h3>
+                    <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-8">请核对初步诊断结果</h3>
                     
                     <div className="grid md:grid-cols-2 gap-8">
                       {/* Industry Selection */}
@@ -1352,7 +1352,7 @@ export default function App() {
                         </div>
                         <div>
                           <h3 className="font-bold text-sm">成长咨询助手</h3>
-                          <p className="text-[10px] text-slate-400">基于当前画像实时解答</p>
+                          <p className="text-[10px] text-slate-400">AI 专家实时在线，深度解析企业潜力</p>
                         </div>
                       </div>
                       <div className="flex items-center gap-1.5 text-[10px] font-bold bg-white/10 px-2 py-1 rounded-full">
@@ -1495,7 +1495,61 @@ export default function App() {
                     </div>
                   </div>
                 </div>
-                </div>
+
+                {/* Success Cases - MOVED TO SIDEBAR */}
+                    <div className="mt-8 pt-8 border-t border-white/10">
+                      <div className="flex justify-between items-center mb-6">
+                        <h3 className="text-sm font-bold text-white uppercase tracking-widest">同赛道对标案例</h3>
+                        <button className="text-[10px] text-indigo-400 font-bold hover:underline">查看更多</button>
+                      </div>
+                      <div className="space-y-4">
+                        <div 
+                          onClick={() => setSelectedCase({
+                            name: "某智能视觉初创企业",
+                            industry: "人工智能",
+                            achievement: "估值提升 30%",
+                            similarity: 85,
+                            image: "https://picsum.photos/seed/tech1/200/200",
+                            details: "该企业在 A 轮融资前，通过小湾企服进行了全面的数据合规改造和专利布局优化，成功吸引了顶级 VC 关注。",
+                            path: ["种子期：技术原型验证", "初创期：数据合规审计", "成长期：专利导航分析"]
+                          })}
+                          className="bg-white/5 p-4 rounded-2xl border border-white/5 hover:border-indigo-500/30 transition-all cursor-pointer group"
+                        >
+                          <div className="flex gap-3 items-center">
+                            <div className="w-10 h-10 rounded-lg overflow-hidden shrink-0">
+                              <img src="https://picsum.photos/seed/tech1/200/200" alt="Case 1" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                            </div>
+                            <div>
+                              <h5 className="text-xs font-bold text-white group-hover:text-indigo-300 transition-colors">某智能视觉初创企业</h5>
+                              <p className="text-[9px] text-slate-500 mt-0.5">估值提升 30% · 路径复刻度 85%</p>
+                            </div>
+                          </div>
+                        </div>
+                        <div 
+                          onClick={() => setSelectedCase({
+                            name: "某生物医药研发平台",
+                            industry: "生物医药",
+                            achievement: "获 500 万政府引导基金",
+                            similarity: 72,
+                            image: "https://picsum.photos/seed/tech2/200/200",
+                            details: "利用小湾智能基金大模型，精准匹配了 3 项省级专项补贴，并由小湾顾问协助完成了申报流程。",
+                            path: ["政策扫描", "条件对标", "智能申报", "获批公示"]
+                          })}
+                          className="bg-white/5 p-4 rounded-2xl border border-white/5 hover:border-indigo-500/30 transition-all cursor-pointer group"
+                        >
+                          <div className="flex gap-3 items-center">
+                            <div className="w-10 h-10 rounded-lg overflow-hidden shrink-0">
+                              <img src="https://picsum.photos/seed/tech2/200/200" alt="Case 2" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                            </div>
+                            <div>
+                              <h5 className="text-xs font-bold text-white group-hover:text-indigo-300 transition-colors">某生物医药研发平台</h5>
+                              <p className="text-[9px] text-slate-500 mt-0.5">获 500 万基金 · 路径复刻度 72%</p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
 
                 {/* Integrated Services */}
                 <div className="lg:col-span-3 mt-12">
@@ -1518,7 +1572,7 @@ export default function App() {
                   </div>
                   
                   <div className="grid md:grid-cols-2 xl:grid-cols-4 gap-8">
-                    {/* Market Intelligence Feed - NEW STICKINESS FEATURE */}
+                    {/* Market Intelligence Feed */}
                     <div className="bg-slate-900 rounded-3xl p-6 border border-white/10 flex flex-col">
                       <div className="flex items-center justify-between mb-4">
                         <h4 className="text-sm font-bold text-white flex items-center gap-2">
@@ -1554,143 +1608,44 @@ export default function App() {
 
                     {/* Policy Matching */}
                     <div className="bg-white p-6 rounded-3xl border border-slate-200 hover:shadow-lg transition-all group">
-                    <div className="w-12 h-12 bg-orange-100 text-orange-600 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                      <FileText size={24} />
-                    </div>
-                    <h4 className="text-lg font-bold mb-2">智能政策匹配</h4>
-                    <p className="text-sm text-slate-500 mb-4">
-                      {profile.name.includes('商汤') 
-                        ? "已匹配 5 项国家级人工智能专项补贴，预计可获支持资金 ¥12M+。" 
-                        : "已为您匹配 4 项省级科技创新专项补贴，平均匹配度 88%。"}
-                    </p>
-                    <button className="text-orange-600 text-sm font-bold flex items-center gap-1 hover:gap-2 transition-all">
-                      查看政策详情 <ChevronRight size={16} />
-                    </button>
-                  </div>
-
-                  {/* Smart Fund */}
-                  <div className="bg-white p-6 rounded-3xl border border-slate-200 hover:shadow-lg transition-all group">
-                    <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                      <Briefcase size={24} />
-                    </div>
-                    <h4 className="text-lg font-bold mb-2">智能基金大模型</h4>
-                    <p className="text-sm text-slate-500 mb-4">已为您匹配 3 支政府引导基金，平均匹配度 92%。</p>
-                    <button className="text-blue-600 text-sm font-bold flex items-center gap-1 hover:gap-2 transition-all">
-                      查看匹配详情 <ChevronRight size={16} />
-                    </button>
-                  </div>
-
-                  {/* Competitor Intelligence - FULLY UNLOCKED */}
-                  <div className="bg-white p-6 rounded-3xl border border-slate-200 hover:shadow-lg transition-all group relative overflow-hidden">
-                    <div className="w-12 h-12 bg-red-100 text-red-600 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                      <TrendingUp size={24} />
-                    </div>
-                    <h4 className="text-lg font-bold mb-2">深度竞品分析</h4>
-                    <p className="text-sm text-slate-500 mb-4">监控 3 家核心竞品的人才流向与专利布局动态。</p>
-                    
-                    <div className="mt-4 space-y-2">
-                      <div className="flex justify-between text-[10px] text-slate-400">
-                        <span>技术重合度</span>
-                        <span className="text-red-500 font-bold">82% (高)</span>
+                      <div className="w-12 h-12 bg-orange-100 text-orange-600 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                        <FileText size={24} />
                       </div>
-                      <div className="w-full bg-slate-100 h-1 rounded-full overflow-hidden">
-                        <div className="bg-red-500 h-full w-[82%]"></div>
-                      </div>
+                      <h4 className="text-lg font-bold mb-2">智能政策匹配</h4>
+                      <p className="text-sm text-slate-500 mb-4">
+                        {profile.name.includes('商汤') 
+                          ? "已匹配 5 项国家级人工智能专项补贴，预计可获支持资金 ¥12M+。" 
+                          : "已为您匹配 4 项省级科技创新专项补贴，平均匹配度 88%。"}
+                      </p>
+                      <button className="text-orange-600 text-sm font-bold flex items-center gap-1 hover:gap-2 transition-all">
+                        查看政策详情 <ChevronRight size={16} />
+                      </button>
                     </div>
-                    
-                    <button className="mt-4 text-indigo-600 text-sm font-bold flex items-center gap-1 hover:gap-2 transition-all">
-                      查看完整竞品报告 <ChevronRight size={16} />
-                    </button>
-                  </div>
 
-                  {/* Financing Service */}
-                  <div className="bg-white p-6 rounded-3xl border border-slate-200 hover:shadow-lg transition-all group">
-                    <div className="w-12 h-12 bg-purple-100 text-purple-600 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                      <Users size={24} />
+                    {/* Smart Fund */}
+                    <div className="bg-white p-6 rounded-3xl border border-slate-200 hover:shadow-lg transition-all group">
+                      <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                        <Briefcase size={24} />
+                      </div>
+                      <h4 className="text-lg font-bold mb-2">智能基金大模型</h4>
+                      <p className="text-sm text-slate-500 mb-4">已为您匹配 3 支政府引导基金，平均匹配度 92%。</p>
+                      <button className="text-blue-600 text-sm font-bold flex items-center gap-1 hover:gap-2 transition-all">
+                        查看匹配详情 <ChevronRight size={16} />
+                      </button>
                     </div>
-                    <h4 className="text-lg font-bold mb-2">融资撮合服务</h4>
-                    <p className="text-sm text-slate-500 mb-4">检测到 5 家活跃 VC 近期关注您的赛道，建议开启路演。</p>
-                    <button className="text-purple-600 text-sm font-bold flex items-center gap-1 hover:gap-2 transition-all">
-                      预约投融资对接 <ChevronRight size={16} />
-                    </button>
-                  </div>
 
-                  {/* Data Security */}
-                  <div className="bg-white p-6 rounded-3xl border border-slate-200 hover:shadow-lg transition-all group">
-                    <div className="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                      <ShieldCheck size={24} />
-                    </div>
-                    <h4 className="text-lg font-bold mb-2">数据安全服务</h4>
-                    <p className="text-sm text-slate-500 mb-4">您的核心专利数据需要加密加固，已为您开启 24h 监控。</p>
-                    <button className="text-emerald-600 text-sm font-bold flex items-center gap-1 hover:gap-2 transition-all">
-                      查看安全报告 <ChevronRight size={16} />
-                    </button>
-                  </div>
-                </div>
-
-                {/* Success Cases */}
-                <div className="lg:col-span-3">
-                  <div className="flex justify-between items-end mb-6">
-                    <div>
-                      <h3 className="text-xl font-bold">行业对标与成功案例</h3>
-                      <p className="text-sm text-slate-500">为您匹配路径相似度 {">"}70% 的标杆企业</p>
-                    </div>
-                    <button className="text-indigo-600 text-sm font-bold">查看更多案例</button>
-                  </div>
-                  <div className="grid md:grid-cols-2 gap-8">
-                    <div 
-                      onClick={() => setSelectedCase({
-                        name: "某智能视觉初创企业",
-                        industry: "人工智能",
-                        achievement: "估值提升 30%",
-                        similarity: 85,
-                        image: "https://picsum.photos/seed/tech1/200/200",
-                        details: "该企业在 A 轮融资前，通过小湾企服进行了全面的数据合规改造和专利布局优化，成功吸引了顶级 VC 关注。",
-                        path: ["种子期：技术原型验证", "初创期：数据合规审计", "成长期：专利导航分析"]
-                      })}
-                      className="bg-white p-6 rounded-3xl border border-slate-200 flex gap-6 items-start cursor-pointer hover:border-indigo-300 hover:shadow-md transition-all"
-                    >
-                      <div className="w-20 h-20 bg-slate-100 rounded-2xl shrink-0 overflow-hidden">
-                        <img src="https://picsum.photos/seed/tech1/200/200" alt="Case 1" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                    {/* Competitor Intelligence */}
+                    <div className="bg-white p-6 rounded-3xl border border-slate-200 hover:shadow-lg transition-all group relative overflow-hidden">
+                      <div className="w-12 h-12 bg-red-100 text-red-600 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                        <TrendingUp size={24} />
                       </div>
-                      <div>
-                        <h5 className="font-bold text-lg">某智能视觉初创企业</h5>
-                        <p className="text-sm text-slate-500 mt-1">通过小湾企服在 A 轮融资前完成了数据合规改造，估值提升 30%。</p>
-                        <div className="mt-3 flex items-center gap-2 text-xs font-bold text-indigo-600">
-                          <span className="bg-indigo-50 px-2 py-0.5 rounded">路径复刻度 85%</span>
-                          <span className="w-1 h-1 bg-slate-300 rounded-full"></span>
-                          <span>点击查看路径</span>
-                        </div>
-                      </div>
-                    </div>
-                    <div 
-                      onClick={() => setSelectedCase({
-                        name: "某生物医药研发平台",
-                        industry: "生物医药",
-                        achievement: "获 500 万政府引导基金",
-                        similarity: 72,
-                        image: "https://picsum.photos/seed/tech2/200/200",
-                        details: "利用小湾智能基金大模型，精准匹配了 3 项省级专项补贴，并由小湾顾问协助完成了申报流程。",
-                        path: ["政策扫描", "条件对标", "智能申报", "获批公示"]
-                      })}
-                      className="bg-white p-6 rounded-3xl border border-slate-200 flex gap-6 items-start cursor-pointer hover:border-indigo-300 hover:shadow-md transition-all"
-                    >
-                      <div className="w-20 h-20 bg-slate-100 rounded-2xl shrink-0 overflow-hidden">
-                        <img src="https://picsum.photos/seed/tech2/200/200" alt="Case 2" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
-                      </div>
-                      <div>
-                        <h5 className="font-bold text-lg">某生物医药研发平台</h5>
-                        <p className="text-sm text-slate-500 mt-1">利用智能基金大模型精准匹配，成功申请 500 万政府引导基金。</p>
-                        <div className="mt-3 flex items-center gap-2 text-xs font-bold text-indigo-600">
-                          <span className="bg-indigo-50 px-2 py-0.5 rounded">路径复刻度 72%</span>
-                          <span className="w-1 h-1 bg-slate-300 rounded-full"></span>
-                          <span>点击查看路径</span>
-                        </div>
-                      </div>
+                      <h4 className="text-lg font-bold mb-2">深度竞品分析</h4>
+                      <p className="text-sm text-slate-500 mb-4">监控 3 家核心竞品的人才流向与专利布局动态。</p>
+                      <button className="mt-4 text-indigo-600 text-sm font-bold flex items-center gap-1 hover:gap-2 transition-all">
+                        查看完整竞品报告 <ChevronRight size={16} />
+                      </button>
                     </div>
                   </div>
-                </div>
-
                 </div>
               </div>
             </motion.div>
