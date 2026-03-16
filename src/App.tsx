@@ -39,6 +39,8 @@ import {
 import { 
   LineChart, 
   Line, 
+  BarChart,
+  Bar,
   XAxis, 
   YAxis, 
   CartesianGrid, 
@@ -184,6 +186,16 @@ const BackgroundAI = () => {
 export default function App() {
   const [step, setStep] = useState<'landing' | 'searching' | 'confirming' | 'dashboard'>('landing');
   const [viewMode, setViewMode] = useState<'desktop' | 'mobile'>('desktop');
+
+  useEffect(() => {
+    const handleResize = () => {
+      setViewMode(window.innerWidth < 1024 ? 'mobile' : 'desktop');
+    };
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   const [companyName, setCompanyName] = useState('');
   const [profile, setProfile] = useState<EnterpriseProfile | null>(null);
   const [chatResponse, setChatResponse] = useState<string | null>(null);
@@ -595,9 +607,9 @@ export default function App() {
       </div>
 
       <div className={cn(
-        "transition-all duration-500 ease-in-out overflow-hidden relative",
+        "transition-all duration-500 ease-in-out relative",
         viewMode === 'mobile' 
-          ? "w-[375px] h-[812px] bg-white rounded-[3rem] border-[8px] border-slate-900 shadow-2xl overflow-y-auto scrollbar-hide" 
+          ? "w-full max-w-[375px] mx-auto min-h-screen lg:h-[812px] lg:my-8 bg-white lg:rounded-[3rem] lg:border-[8px] lg:border-slate-900 lg:shadow-2xl overflow-y-auto scrollbar-hide" 
           : "w-full min-h-screen"
       )}>
         {step === 'landing' && <BackgroundAI />}
@@ -1189,10 +1201,10 @@ export default function App() {
               <div className={cn("grid gap-4", viewMode === 'mobile' ? "grid-cols-1" : "grid-cols-1 md:grid-cols-3 md:gap-8")}>
                 {/* Growth Prediction */}
                 <div className={cn(
-                  "bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden",
+                  "bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden flex flex-col",
                   viewMode === 'mobile' ? "p-4" : "p-6 md:p-8 md:col-span-2"
                 )}>
-                  <div className={cn("flex justify-between items-center", viewMode === 'mobile' ? "mb-4" : "mb-8")}>
+                  <div className={cn("flex justify-between items-center shrink-0", viewMode === 'mobile' ? "mb-4" : "mb-8")}>
                     <h3 className={cn("font-bold flex items-center gap-2 whitespace-nowrap", viewMode === 'mobile' ? "text-sm" : "text-xl")}>
                       <TrendingUp className="text-indigo-600" size={viewMode === 'mobile' ? 16 : 24} />
                       成长潜力预测
@@ -1208,138 +1220,172 @@ export default function App() {
                       </div>
                     </div>
                   </div>
-                  <div className={cn("w-full", viewMode === 'mobile' ? "h-[200px]" : "h-[300px]")}>
-                    <ResponsiveContainer width="100%" height="100%">
-                      <AreaChart data={growthData}>
-                        <defs>
-                          <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="#4F46E5" stopOpacity={0.3}/>
-                            <stop offset="95%" stopColor="#4F46E5" stopOpacity={0}/>
-                          </linearGradient>
-                          <linearGradient id="colorPred" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="#C7D2FE" stopOpacity={0.2}/>
-                            <stop offset="95%" stopColor="#C7D2FE" stopOpacity={0}/>
-                          </linearGradient>
-                        </defs>
-                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F1F5F9" />
-                        <XAxis 
-                          dataKey="year" 
-                          axisLine={false} 
-                          tickLine={false} 
-                          tick={{fill: '#94A3B8', fontSize: 12}} 
-                          padding={{ left: 10, right: 10 }}
-                          ticks={['2024', '2025', '2026', '2027', '2028', '2029', '2030', '2031', '2032', '2033']}
-                        />
-                        <YAxis hide domain={[0, 'dataMax + 100']} />
-                        <Tooltip 
-                          cursor={{ stroke: '#E2E8F0', strokeWidth: 2 }}
-                          content={({ active, payload, label }) => {
-                            if (active && payload && payload.length) {
-                              const data = growthData.find(d => d.year === label);
-                              const isPrediction = data?.value === null;
-                              return (
-                                <div className="bg-white/95 backdrop-blur-sm p-4 rounded-2xl shadow-2xl border border-slate-100 max-w-[260px] animate-in fade-in zoom-in duration-200">
-                                  <div className="flex justify-between items-center mb-2">
-                                    <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{label} 年度分析</div>
-                                    <div className={cn(
-                                      "text-[10px] px-2 py-0.5 rounded-full font-bold uppercase",
-                                      isPrediction ? "bg-indigo-100 text-indigo-600" : "bg-emerald-100 text-emerald-600"
-                                    )}>
-                                      {isPrediction ? "AI 预测" : "历史实绩"}
-                                    </div>
-                                  </div>
-                                  <div className="text-lg font-bold text-slate-900 mb-1">
-                                    {data?.milestone || '稳健增长期'}
-                                  </div>
-                                  <div className="text-2xl font-black text-indigo-600 mb-3">
-                                    {isPrediction ? data?.pred : data?.value}
-                                    <span className="text-xs font-medium text-slate-400 ml-1">成长指数</span>
-                                  </div>
-                                  
-                                  {data?.potentialRisks && (
-                                    <div className="mt-2 pt-2 border-t border-slate-100">
-                                      <div className="text-[10px] font-bold text-amber-600 uppercase mb-2 flex items-center gap-1">
-                                        <AlertCircle size={10} /> 潜在挑战与风险
+                  <div className="w-full min-w-0 flex-1 overflow-hidden">
+                    {viewMode === 'desktop' ? (
+                      <div className="h-[300px]">
+                        <ResponsiveContainer width="100%" height="100%">
+                          <AreaChart data={growthData} margin={{ top: 5, right: 5, left: 5, bottom: 5 }}>
+                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F1F5F9" />
+                            <XAxis 
+                              dataKey="year" 
+                              axisLine={false} 
+                              tickLine={false} 
+                              tick={{fill: '#94A3B8', fontSize: 10}} 
+                            />
+                            <YAxis hide domain={[0, 700]} />
+                            <Tooltip 
+                              cursor={{ stroke: '#E2E8F0', strokeWidth: 2 }}
+                              content={({ active, payload, label }) => {
+                                if (active && payload && payload.length) {
+                                  const data = growthData.find(d => d.year === label);
+                                  const isPrediction = !data?.value;
+                                  return (
+                                    <div className="bg-white/95 backdrop-blur-sm p-4 rounded-2xl shadow-2xl border border-slate-100 max-w-[260px] animate-in fade-in zoom-in duration-200">
+                                      <div className="flex justify-between items-center mb-2">
+                                        <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{label} 年度分析</div>
+                                        <div className={cn(
+                                          "text-[10px] px-2 py-0.5 rounded-full font-bold uppercase",
+                                          isPrediction ? "bg-indigo-100 text-indigo-600" : "bg-emerald-100 text-emerald-600"
+                                        )}>
+                                          {isPrediction ? "AI 预测" : "历史实绩"}
+                                        </div>
                                       </div>
-                                      <div className="grid grid-cols-1 gap-1.5">
-                                        {data.potentialRisks.map((risk, i) => (
-                                          <div key={i} className="text-[10px] text-slate-500 flex items-start gap-2 bg-slate-50 p-1.5 rounded-lg">
-                                            <span className="mt-1 w-1 h-1 bg-amber-400 rounded-full shrink-0" />
-                                            {risk}
-                                          </div>
-                                        ))}
+                                      <div className="text-lg font-bold text-slate-900 mb-1">
+                                        {data?.milestone || '稳健增长期'}
+                                      </div>
+                                      <div className="text-2xl font-black text-indigo-600 mb-3">
+                                        {isPrediction ? data?.pred : data?.value}
+                                        <span className="text-xs font-medium text-slate-400 ml-1">成长指数</span>
                                       </div>
                                     </div>
-                                  )}
-                                </div>
-                              );
-                            }
-                            return null;
-                          }}
-                        />
-                        <Area 
-                          type="monotone" 
-                          dataKey="pred" 
-                          stroke="#C7D2FE" 
-                          fill="url(#colorPred)" 
-                          strokeWidth={2} 
-                          strokeDasharray="5 5" 
-                          animationDuration={2000}
-                        />
-                        <Area 
-                          type="monotone" 
-                          dataKey="value" 
-                          stroke="#4F46E5" 
-                          fillOpacity={1} 
-                          fill="url(#colorValue)" 
-                          strokeWidth={4}
-                          activeDot={{ r: 6, strokeWidth: 0, fill: '#4F46E5' }}
-                          animationDuration={1500}
-                        />
-                        
-                        {/* Present Day Reference Line */}
-                        <ReferenceLine 
-                          x="2026" 
-                          stroke="#4F46E5" 
-                          strokeDasharray="3 3" 
-                          strokeWidth={2}
-                          label={{ 
-                            value: '当前节点', 
-                            position: 'top', 
-                            fill: '#4F46E5', 
-                            fontSize: viewMode === 'mobile' ? 10 : 12, 
-                            fontWeight: 'bold',
-                            dy: -10
-                          }} 
-                        />
-                        
-                        {/* Milestones Markers */}
-                        {growthData.map((entry, index) => (
-                          entry.milestone && (index % 2 === 0 || entry.year === '2027') && (
-                            <ReferenceDot
-                              key={index}
-                              x={entry.year}
-                              y={entry.pred}
-                              r={5}
+                                  );
+                                }
+                                return null;
+                              }}
+                            />
+                            <Area 
+                              type="monotone" 
+                              dataKey="pred" 
+                              stroke="#C7D2FE" 
+                              fill="#C7D2FE" 
+                              fillOpacity={0.1}
+                              strokeWidth={2} 
+                              strokeDasharray="5 5" 
+                            />
+                            <Area 
+                              type="monotone" 
+                              dataKey="value" 
+                              stroke="#4F46E5" 
                               fill="#4F46E5"
-                              stroke="#fff"
+                              fillOpacity={0.2}
+                              strokeWidth={4}
+                              activeDot={{ r: 6, strokeWidth: 0, fill: '#4F46E5' }}
+                            />
+                            
+                            {/* Present Day Reference Line */}
+                            <ReferenceLine 
+                              x="2024" 
+                              stroke="#4F46E5" 
+                              strokeDasharray="3 3" 
                               strokeWidth={2}
-                            >
-                              <Label
-                                value={entry.milestone}
-                                position="top"
-                                offset={12}
-                                style={{ 
-                                  fill: '#4338CA', 
-                                  fontSize: viewMode === 'mobile' ? '9px' : '11px', 
-                                  fontWeight: '700'
-                                }}
-                              />
-                            </ReferenceDot>
-                          )
-                        ))}
-                      </AreaChart>
-                    </ResponsiveContainer>
+                              label={{ 
+                                value: '当前节点', 
+                                position: 'top', 
+                                fill: '#4F46E5', 
+                                fontSize: 12, 
+                                fontWeight: 'bold',
+                                dy: -10
+                              }} 
+                            />
+                            
+                            {/* Milestones Markers */}
+                            {growthData.map((entry, index) => (
+                              entry.milestone && (
+                                <ReferenceDot
+                                  key={index}
+                                  x={entry.year}
+                                  y={entry.pred}
+                                  r={5}
+                                  fill="#4F46E5"
+                                  stroke="#fff"
+                                  strokeWidth={2}
+                                >
+                                  <Label
+                                    value={entry.milestone}
+                                    position="top"
+                                    offset={12}
+                                    style={{ 
+                                      fill: '#4338CA', 
+                                      fontSize: '11px', 
+                                      fontWeight: '700'
+                                    }}
+                                  />
+                                </ReferenceDot>
+                              )
+                            ))}
+                          </AreaChart>
+                        </ResponsiveContainer>
+                      </div>
+                    ) : (
+                      <div className="h-[200px] w-full bg-slate-50/50 rounded-2xl p-2">
+                        <ResponsiveContainer width="100%" height="100%">
+                          <AreaChart data={growthData} margin={{ top: 20, right: 10, left: -20, bottom: 0 }}>
+                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
+                            <XAxis 
+                              dataKey="year" 
+                              axisLine={false} 
+                              tickLine={false} 
+                              tick={{fill: '#94A3B8', fontSize: 9}} 
+                            />
+                            <YAxis hide domain={[0, 700]} />
+                            <Tooltip 
+                              content={({ active, payload }) => {
+                                if (active && payload && payload.length) {
+                                  return (
+                                    <div className="bg-white p-2 rounded-lg shadow-lg border border-slate-100 text-[10px] font-bold">
+                                      {payload[0].value} 指数
+                                    </div>
+                                  );
+                                }
+                                return null;
+                              }}
+                            />
+                            <Area 
+                              type="monotone" 
+                              dataKey="pred" 
+                              stroke="#4F46E5" 
+                              fill="#4F46E5" 
+                              fillOpacity={0.1}
+                              strokeWidth={2}
+                            />
+                            {growthData.map((entry, index) => (
+                              entry.milestone && (
+                                <ReferenceDot
+                                  key={index}
+                                  x={entry.year}
+                                  y={entry.pred}
+                                  r={3}
+                                  fill="#4F46E5"
+                                  stroke="#fff"
+                                  strokeWidth={1}
+                                >
+                                  <Label
+                                    value={entry.milestone}
+                                    position="top"
+                                    offset={8}
+                                    style={{ 
+                                      fill: '#4338CA', 
+                                      fontSize: '8px', 
+                                      fontWeight: '700'
+                                    }}
+                                  />
+                                </ReferenceDot>
+                              )
+                            ))}
+                          </AreaChart>
+                        </ResponsiveContainer>
+                      </div>
+                    )}
                   </div>
                   <div className={cn("bg-indigo-50 rounded-2xl border border-indigo-100 flex items-start gap-3", viewMode === 'mobile' ? "mt-4 p-3" : "mt-6 p-4")}>
                     <Sparkles className="text-indigo-600 shrink-0" size={viewMode === 'mobile' ? 16 : 20} />
@@ -1349,16 +1395,16 @@ export default function App() {
                         : `AI 深度分析：基于数百万企业案例库推演，由于您在${profile.keyTech[0]}领域的持续投入，预计未来 10 年将迎来业务爆发期，建议提前储备人才与服务器资源。`}
                     </p>
                   </div>
-                  <div className="mt-4 flex items-center gap-4 text-[10px] text-slate-400">
-                    <div className="flex items-center gap-1">
+                  <div className={cn("mt-4 flex items-center gap-4 text-[10px] text-slate-400", viewMode === 'mobile' ? "flex-wrap gap-y-2" : "")}>
+                    <div className="flex items-center gap-1 whitespace-nowrap">
                       <div className="w-2 h-2 rounded-full bg-indigo-600"></div>
                       <span>实绩曲线</span>
                     </div>
-                    <div className="flex items-center gap-1">
+                    <div className="flex items-center gap-1 whitespace-nowrap">
                       <div className="w-2 h-2 rounded-full bg-indigo-300 border border-dashed border-indigo-400"></div>
                       <span>AI 预测路径</span>
                     </div>
-                    <div className="ml-auto italic">* 成长指数基于营收、人才规模及政策匹配度综合计算</div>
+                    <div className={cn("italic", viewMode === 'mobile' ? "w-full" : "ml-auto")}>* 成长指数基于营收、人才规模及政策匹配度综合计算</div>
                   </div>
 
                   {/* Growth Roadmap - Redesigned as a visual path */}
@@ -1385,9 +1431,9 @@ export default function App() {
                       </div>
                     </div>
 
-                    <div className={cn("relative space-y-0", viewMode === 'mobile' ? "pl-6" : "pl-8")}>
+                    <div className={cn("relative space-y-0", viewMode === 'mobile' ? "pl-5" : "pl-8")}>
                       {/* Vertical Path Line */}
-                      <div className={cn("absolute top-2 bottom-2 w-0.5 bg-slate-100", viewMode === 'mobile' ? "left-[9px]" : "left-[11px]")}>
+                      <div className={cn("absolute top-2 bottom-2 w-0.5 bg-slate-100", viewMode === 'mobile' ? "left-[7px]" : "left-[11px]")}>
                         <div className="absolute top-0 left-0 w-full bg-indigo-600 transition-all duration-1000" style={{ height: '25%' }}></div>
                       </div>
 
@@ -1395,18 +1441,18 @@ export default function App() {
                         <div 
                           key={task.id}
                           onClick={() => toggleTask(task.id)}
-                          className={cn("relative group cursor-pointer", viewMode === 'mobile' ? "pb-4" : "pb-8")}
+                          className={cn("relative group cursor-pointer", viewMode === 'mobile' ? "pb-3" : "pb-8")}
                         >
                           {/* Node Dot */}
                           <div className={cn(
                             "absolute top-1 rounded-full border-4 border-white shadow-sm flex items-center justify-center z-10 transition-all",
-                            viewMode === 'mobile' ? "left-[-23px] w-4 h-4" : "left-[-29px] w-6 h-6",
+                            viewMode === 'mobile' ? "left-[-21px] w-3.5 h-3.5" : "left-[-29px] w-6 h-6",
                             task.status === 'completed' ? "bg-emerald-500 scale-110" : 
                             task.status === 'in-progress' ? "bg-indigo-600 animate-pulse scale-125" :
                             "bg-slate-200"
                           )}>
-                            {task.status === 'completed' && <Check size={viewMode === 'mobile' ? 8 : 12} className="text-white" />}
-                            {task.status === 'in-progress' && <div className={cn("rounded-full bg-white", viewMode === 'mobile' ? "w-1 h-1" : "w-1.5 h-1.5")} />}
+                            {task.status === 'completed' && <Check size={viewMode === 'mobile' ? 6 : 12} className="text-white" />}
+                            {task.status === 'in-progress' && <div className={cn("rounded-full bg-white", viewMode === 'mobile' ? "w-0.5 h-0.5" : "w-1.5 h-1.5")} />}
                           </div>
 
                           <div className={cn(
@@ -1453,10 +1499,16 @@ export default function App() {
                       ))}
 
                       <div className="relative group">
-                        <div className="absolute left-[-29px] top-1 w-6 h-6 rounded-full border-4 border-white bg-slate-50 flex items-center justify-center z-10">
-                          <Plus size={12} className="text-slate-400" />
+                        <div className={cn(
+                          "absolute top-1 rounded-full border-4 border-white bg-slate-50 flex items-center justify-center z-10",
+                          viewMode === 'mobile' ? "left-[-21px] w-3.5 h-3.5" : "left-[-29px] w-6 h-6"
+                        )}>
+                          <Plus size={viewMode === 'mobile' ? 8 : 12} className="text-slate-400" />
                         </div>
-                        <button className="w-full p-4 rounded-2xl border border-dashed border-slate-200 text-slate-400 text-xs font-bold hover:border-indigo-400 hover:text-indigo-600 hover:bg-indigo-50/30 transition-all text-left pl-5">
+                        <button className={cn(
+                          "w-full rounded-2xl border border-dashed border-slate-200 text-slate-400 text-[10px] font-bold hover:border-indigo-400 hover:text-indigo-600 hover:bg-indigo-50/30 transition-all text-left",
+                          viewMode === 'mobile' ? "p-3 pl-4" : "p-4 pl-5"
+                        )}>
                           添加下一阶段目标...
                         </button>
                       </div>
@@ -1530,27 +1582,27 @@ export default function App() {
 
                               <div 
                                 onClick={() => setDashboardInput("推荐一些适合研发团队的办公空间")}
-                                className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm hover:border-blue-300 transition-all cursor-pointer group"
+                                className={cn("bg-white rounded-2xl border border-slate-100 shadow-sm hover:border-blue-300 transition-all cursor-pointer group", viewMode === 'mobile' ? "p-3" : "p-4")}
                               >
-                                <div className="flex justify-between items-start mb-2">
-                                  <span className="text-[10px] font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded">办公空间</span>
-                                  <ChevronRight size={14} className="text-slate-300 group-hover:text-blue-600 transition-colors" />
+                                <div className="flex justify-between items-start mb-1">
+                                  <span className="text-[8px] font-bold text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded">办公空间</span>
+                                  <ChevronRight size={12} className="text-slate-300 group-hover:text-blue-600 transition-colors" />
                                 </div>
-                                <div className="text-xs font-bold text-slate-800">小湾科创园 B座 500㎡</div>
-                                <p className="text-[10px] text-slate-500 mt-1">预计 8 月份当前空间将达到饱和</p>
+                                <div className={cn("font-bold text-slate-800", viewMode === 'mobile' ? "text-[10px]" : "text-xs")}>小湾科创园 B座 500㎡</div>
+                                <p className="text-[8px] text-slate-500 mt-0.5">预计 8 月份当前空间将达到饱和</p>
                               </div>
 
                               {jiaxingCustomer && (
                                 <div 
                                   onClick={() => setDashboardInput(`如何与 ${jiaxingCustomer.name} 进行供应链对接？`)}
-                                  className="bg-indigo-50 p-4 rounded-2xl border border-indigo-100 shadow-sm hover:border-indigo-300 transition-all cursor-pointer group"
+                                  className={cn("bg-indigo-50 rounded-2xl border border-indigo-100 shadow-sm hover:border-indigo-300 transition-all cursor-pointer group", viewMode === 'mobile' ? "p-3" : "p-4")}
                                 >
-                                  <div className="flex justify-between items-start mb-2">
-                                    <span className="text-[10px] font-bold text-indigo-600 bg-white px-2 py-0.5 rounded">嘉兴潜在商机</span>
-                                    <ChevronRight size={14} className="text-indigo-300 group-hover:text-indigo-600 transition-colors" />
+                                  <div className="flex justify-between items-start mb-1">
+                                    <span className="text-[8px] font-bold text-indigo-600 bg-white px-1.5 py-0.5 rounded">嘉兴潜在商机</span>
+                                    <ChevronRight size={12} className="text-indigo-300 group-hover:text-indigo-600 transition-colors" />
                                   </div>
-                                  <div className="text-xs font-bold text-indigo-900">{jiaxingCustomer.name}</div>
-                                  <p className="text-[10px] text-indigo-700/70 mt-1">{jiaxingCustomer.reason}</p>
+                                  <div className={cn("font-bold text-indigo-900", viewMode === 'mobile' ? "text-[10px]" : "text-xs")}>{jiaxingCustomer.name}</div>
+                                  <p className="text-[8px] text-indigo-700/70 mt-0.5">{jiaxingCustomer.reason}</p>
                                 </div>
                               )}
                             </div>
