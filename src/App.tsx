@@ -32,7 +32,9 @@ import {
   UserPlus,
   Zap,
   Map,
-  Check
+  Check,
+  Smartphone,
+  Monitor
 } from 'lucide-react';
 import { 
   LineChart, 
@@ -181,6 +183,7 @@ const BackgroundAI = () => {
 
 export default function App() {
   const [step, setStep] = useState<'landing' | 'searching' | 'confirming' | 'dashboard'>('landing');
+  const [viewMode, setViewMode] = useState<'desktop' | 'mobile'>('desktop');
   const [companyName, setCompanyName] = useState('');
   const [profile, setProfile] = useState<EnterpriseProfile | null>(null);
   const [chatResponse, setChatResponse] = useState<string | null>(null);
@@ -563,28 +566,69 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] text-slate-900 font-sans selection:bg-indigo-100">
-      {step === 'landing' && <BackgroundAI />}
-      {/* Navigation */}
-      <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-bottom border-slate-200 px-6 py-4 flex justify-between items-center">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-white">
-            <Sparkles size={20} />
-          </div>
-          <span className="font-bold text-xl tracking-tight">小湾企服 <span className="text-indigo-600">Pro</span></span>
-        </div>
-        <div className="hidden md:flex items-center gap-6 text-sm font-medium text-slate-600">
-          <a href="#" className="hover:text-indigo-600 transition-colors">智能政策</a>
-          <a href="#" className="hover:text-indigo-600 transition-colors">智能基金</a>
-          <a href="#" className="hover:text-indigo-600 transition-colors">融资服务</a>
-          <a href="#" className="hover:text-indigo-600 transition-colors">数据安全</a>
-          <button className="bg-slate-900 text-white px-4 py-2 rounded-full hover:bg-slate-800 transition-all">
-            管理后台
-          </button>
-        </div>
-      </nav>
+    <div className={cn(
+      "min-h-screen bg-slate-50 font-sans text-slate-900 selection:bg-indigo-100 selection:text-indigo-900",
+      viewMode === 'mobile' ? "flex items-center justify-center bg-slate-200 py-8" : ""
+    )}>
+      {/* View Mode Toggle */}
+      <div className="fixed top-6 right-6 z-[200] flex bg-white/80 backdrop-blur-md p-1.5 rounded-2xl border border-slate-200 shadow-xl">
+        <button
+          onClick={() => setViewMode('desktop')}
+          className={cn(
+            "p-2 rounded-xl transition-all flex items-center gap-2 text-xs font-bold",
+            viewMode === 'desktop' ? "bg-indigo-600 text-white shadow-lg" : "text-slate-400 hover:text-slate-600"
+          )}
+        >
+          <Monitor size={16} />
+          <span className="hidden md:inline">桌面端</span>
+        </button>
+        <button
+          onClick={() => setViewMode('mobile')}
+          className={cn(
+            "p-2 rounded-xl transition-all flex items-center gap-2 text-xs font-bold",
+            viewMode === 'mobile' ? "bg-indigo-600 text-white shadow-lg" : "text-slate-400 hover:text-slate-600"
+          )}
+        >
+          <Smartphone size={16} />
+          <span className="hidden md:inline">移动端</span>
+        </button>
+      </div>
 
-      <main className="relative min-h-[80vh] max-w-7xl mx-auto px-6 py-12">
+      <div className={cn(
+        "transition-all duration-500 ease-in-out overflow-hidden relative",
+        viewMode === 'mobile' 
+          ? "w-[375px] h-[812px] bg-white rounded-[3rem] border-[8px] border-slate-900 shadow-2xl overflow-y-auto scrollbar-hide" 
+          : "w-full min-h-screen"
+      )}>
+        {step === 'landing' && <BackgroundAI />}
+        {/* Navigation */}
+        <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-200 px-6 py-4 flex justify-between items-center">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-white">
+              <Sparkles size={20} />
+            </div>
+            <span className="font-bold text-xl tracking-tight">小湾企服 <span className="text-indigo-600">Pro</span></span>
+          </div>
+          <div className="hidden lg:flex items-center gap-6 text-sm font-medium text-slate-600">
+            <a href="#" className="hover:text-indigo-600 transition-colors">智能政策</a>
+            <a href="#" className="hover:text-indigo-600 transition-colors">智能基金</a>
+            <a href="#" className="hover:text-indigo-600 transition-colors">融资服务</a>
+            <a href="#" className="hover:text-indigo-600 transition-colors">数据安全</a>
+            <button className="bg-slate-900 text-white px-4 py-2 rounded-full hover:bg-slate-800 transition-all">
+              管理后台
+            </button>
+          </div>
+          <div className="lg:hidden">
+            <button className="p-2 text-slate-600 hover:bg-slate-100 rounded-lg">
+              <MessageSquare size={20} />
+            </button>
+          </div>
+        </nav>
+
+      <main className={cn(
+        "relative min-h-[80vh] max-w-7xl mx-auto px-6",
+        viewMode === 'mobile' ? "py-6" : "py-12"
+      )}>
         <AnimatePresence mode="wait">
           {step === 'landing' && (
             <div key="landing-container" className="relative w-full">
@@ -593,17 +637,29 @@ export default function App() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
-                className="relative text-center max-w-3xl mx-auto py-20 z-10"
+                className={cn(
+                  "relative text-center max-w-3xl mx-auto z-10",
+                  viewMode === 'mobile' ? "py-4" : "py-10 lg:py-20"
+                )}
               >
                 <div className="relative">
-              <h1 className="text-5xl md:text-6xl font-extrabold tracking-tight mb-4 bg-gradient-to-r from-slate-900 via-indigo-900 to-slate-900 bg-clip-text text-transparent">
+              <h1 className={cn(
+                "font-extrabold tracking-tight mb-4 bg-gradient-to-r from-slate-900 via-indigo-900 to-slate-900 bg-clip-text text-transparent",
+                viewMode === 'mobile' ? "text-3xl" : "text-5xl md:text-6xl"
+              )}>
                 数智驱动 助企成长
               </h1>
-              <p className="text-lg text-slate-600 mb-10 leading-relaxed max-w-2xl mx-auto">
+              <p className={cn(
+                "text-slate-600 leading-relaxed max-w-2xl mx-auto",
+                viewMode === 'mobile' ? "text-sm mb-6" : "text-lg mb-10"
+              )}>
                 输入企业名称开启 AI 深度诊断，精准匹配政策、资金、人才及全维度经营要素。
               </p>
               
-              <div className="relative max-w-2xl mx-auto group mb-12">
+              <div className={cn(
+                "relative max-w-2xl mx-auto group",
+                viewMode === 'mobile' ? "mb-6" : "mb-12"
+              )}>
                 <div className="absolute -inset-1 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
                 <div className="relative flex items-center bg-white rounded-2xl shadow-xl border border-slate-200 p-2">
                   <MessageSquare className="ml-4 text-indigo-500" size={24} />
@@ -664,42 +720,42 @@ export default function App() {
               </AnimatePresence>
 
               {/* Service Entries Grid */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto mb-16">
+              <div className={cn("grid grid-cols-2 md:grid-cols-4 gap-3 max-w-4xl mx-auto", viewMode === 'mobile' ? "mb-8" : "mb-16")}>
                 <div 
                   onClick={() => generateSolution('policy')}
-                  className="bg-white p-6 rounded-3xl border border-slate-200 hover:border-indigo-300 hover:shadow-lg transition-all cursor-pointer group"
+                  className={cn("bg-white rounded-3xl border border-slate-200 hover:border-indigo-300 hover:shadow-lg transition-all cursor-pointer group", viewMode === 'mobile' ? "p-3" : "p-6")}
                 >
-                  <div className="w-12 h-12 bg-orange-100 text-orange-600 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                    <FileText size={24} />
+                  <div className={cn("bg-orange-100 text-orange-600 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform", viewMode === 'mobile' ? "w-10 h-10 mb-2" : "w-12 h-12 mb-4")}>
+                    <FileText size={viewMode === 'mobile' ? 20 : 24} />
                   </div>
-                  <h4 className="font-bold text-slate-900">问政策</h4>
+                  <h4 className={cn("font-bold text-slate-900", viewMode === 'mobile' ? "text-xs" : "text-base")}>问政策</h4>
                 </div>
                 <div 
                   onClick={() => generateSolution('finance')}
-                  className="bg-white p-6 rounded-3xl border border-slate-200 hover:border-indigo-300 hover:shadow-lg transition-all cursor-pointer group text-center"
+                  className={cn("bg-white rounded-3xl border border-slate-200 hover:border-indigo-300 hover:shadow-lg transition-all cursor-pointer group text-center", viewMode === 'mobile' ? "p-3" : "p-6")}
                 >
-                  <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center mb-4 mx-auto group-hover:scale-110 transition-transform">
-                    <Coins size={24} />
+                  <div className={cn("bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center mx-auto group-hover:scale-110 transition-transform", viewMode === 'mobile' ? "w-10 h-10 mb-2" : "w-12 h-12 mb-4")}>
+                    <Coins size={viewMode === 'mobile' ? 20 : 24} />
                   </div>
-                  <h4 className="font-bold text-slate-900">找金融</h4>
+                  <h4 className={cn("font-bold text-slate-900", viewMode === 'mobile' ? "text-xs" : "text-base")}>找金融</h4>
                 </div>
                 <div 
                   onClick={() => generateSolution('talent')}
-                  className="bg-white p-6 rounded-3xl border border-slate-200 hover:border-indigo-300 hover:shadow-lg transition-all cursor-pointer group text-center"
+                  className={cn("bg-white rounded-3xl border border-slate-200 hover:border-indigo-300 hover:shadow-lg transition-all cursor-pointer group text-center", viewMode === 'mobile' ? "p-3" : "p-6")}
                 >
-                  <div className="w-12 h-12 bg-purple-100 text-purple-600 rounded-2xl flex items-center justify-center mb-4 mx-auto group-hover:scale-110 transition-transform">
-                    <UserPlus size={24} />
+                  <div className={cn("bg-purple-100 text-purple-600 rounded-2xl flex items-center justify-center mx-auto group-hover:scale-110 transition-transform", viewMode === 'mobile' ? "w-10 h-10 mb-2" : "w-12 h-12 mb-4")}>
+                    <UserPlus size={viewMode === 'mobile' ? 20 : 24} />
                   </div>
-                  <h4 className="font-bold text-slate-900">聘人才</h4>
+                  <h4 className={cn("font-bold text-slate-900", viewMode === 'mobile' ? "text-xs" : "text-base")}>聘人才</h4>
                 </div>
                 <div 
                   onClick={() => generateSolution('technology')}
-                  className="bg-white p-6 rounded-3xl border border-slate-200 hover:border-indigo-300 hover:shadow-lg transition-all cursor-pointer group text-center"
+                  className={cn("bg-white rounded-3xl border border-slate-200 hover:border-indigo-300 hover:shadow-lg transition-all cursor-pointer group text-center", viewMode === 'mobile' ? "p-3" : "p-6")}
                 >
-                  <div className="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center mb-4 mx-auto group-hover:scale-110 transition-transform">
-                    <Cpu size={24} />
+                  <div className={cn("bg-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center mx-auto group-hover:scale-110 transition-transform", viewMode === 'mobile' ? "w-10 h-10 mb-2" : "w-12 h-12 mb-4")}>
+                    <Cpu size={viewMode === 'mobile' ? 20 : 24} />
                   </div>
-                  <h4 className="font-bold text-slate-900">强科技</h4>
+                  <h4 className={cn("font-bold text-slate-900", viewMode === 'mobile' ? "text-xs" : "text-base")}>强科技</h4>
                 </div>
               </div>
               
@@ -723,74 +779,77 @@ export default function App() {
               </div>
 
               {/* Jiaxing Region Opportunities Feed - NEW ENGAGEMENT FEATURE */}
-              <div className="mt-24 text-left">
-                <div className="flex justify-between items-end mb-10">
+              <div className={cn(viewMode === 'mobile' ? "mt-12" : "mt-24", "text-left")}>
+                <div className={cn("flex justify-between items-end", viewMode === 'mobile' ? "mb-4" : "mb-10")}>
                   <div>
-                    <h2 className="text-3xl font-bold text-slate-900 mb-2 flex items-center gap-3">
+                    <h2 className={cn("font-bold text-slate-900 mb-1 flex items-center gap-2", viewMode === 'mobile' ? "text-xl" : "text-3xl")}>
                       嘉兴企业商机
-                      <span className="flex items-center gap-1 px-2 py-0.5 bg-red-500 text-white text-[10px] font-bold rounded-full animate-pulse">
+                      <span className="flex items-center gap-1 px-1.5 py-0.5 bg-red-500 text-white text-[8px] font-bold rounded-full animate-pulse">
                         <div className="w-1 h-1 bg-white rounded-full"></div>
                         LIVE
                       </span>
                     </h2>
-                    <p className="text-slate-500">实时匹配本地合作、融资与人才需求</p>
+                    <p className={cn("text-slate-500", viewMode === 'mobile' ? "text-[10px]" : "text-sm")}>实时匹配本地合作、融资与人才需求</p>
                   </div>
-                  <button className="text-indigo-600 font-bold flex items-center gap-1 hover:gap-2 transition-all">
-                    查看更多商机 <ChevronRight size={20} />
+                  <button className="text-indigo-600 font-bold flex items-center gap-1 hover:gap-2 transition-all text-xs">
+                    更多 <ChevronRight size={16} />
                   </button>
                 </div>
 
-                <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div className={cn("grid gap-4", viewMode === 'mobile' ? "grid-cols-1" : "md:grid-cols-2 lg:grid-cols-4")}>
                   {jiaxingOpportunities.map((opp) => (
-                    <div key={opp.id} className="bg-white p-6 rounded-3xl border border-slate-200 hover:border-indigo-300 hover:shadow-xl transition-all group cursor-pointer">
-                      <div className="flex justify-between items-start mb-4">
-                        <span className="text-[10px] font-bold px-2 py-1 bg-indigo-50 text-indigo-600 rounded-lg uppercase tracking-wider">
+                    <div key={opp.id} className={cn("bg-white rounded-3xl border border-slate-200 hover:border-indigo-300 hover:shadow-xl transition-all group cursor-pointer", viewMode === 'mobile' ? "p-4" : "p-6")}>
+                      <div className="flex justify-between items-start mb-2">
+                        <span className="text-[8px] font-bold px-1.5 py-0.5 bg-indigo-50 text-indigo-600 rounded-lg uppercase tracking-wider">
                           {opp.industry}
                         </span>
-                        <span className="text-[10px] text-slate-400">{opp.time}</span>
+                        <span className="text-[8px] text-slate-400">{opp.time}</span>
                       </div>
-                      <div className="mb-4">
-                        <div className="text-xs font-bold text-indigo-500 mb-1">{opp.type}</div>
-                        <h4 className="text-sm font-bold text-slate-900 leading-snug group-hover:text-indigo-600 transition-colors">
+                      <div className="mb-3">
+                        <div className="text-[10px] font-bold text-indigo-500 mb-0.5">{opp.type}</div>
+                        <h4 className={cn("font-bold text-slate-900 leading-snug group-hover:text-indigo-600 transition-colors", viewMode === 'mobile' ? "text-xs" : "text-sm")}>
                           {opp.title}
                         </h4>
                       </div>
-                      <div className="pt-4 border-t border-slate-100 flex items-center justify-between">
+                      <div className="pt-3 border-t border-slate-100 flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                          <div className="w-6 h-6 bg-slate-100 rounded-full flex items-center justify-center">
-                            <ShieldCheck size={12} className="text-slate-400" />
+                          <div className="w-5 h-5 bg-slate-100 rounded-full flex items-center justify-center">
+                            <ShieldCheck size={10} className="text-slate-400" />
                           </div>
-                          <span className="text-[10px] font-medium text-slate-500 italic">{opp.company}</span>
+                          <span className="text-[8px] font-medium text-slate-500 italic">{opp.company}</span>
                         </div>
                         <button className="text-indigo-600">
-                          <ArrowRight size={16} />
+                          <ArrowRight size={14} />
                         </button>
                       </div>
                     </div>
                   ))}
                 </div>
                 
-                <div className="mt-10 bg-indigo-600 rounded-[2.5rem] p-8 text-white flex flex-col md:flex-row items-center justify-between gap-6 overflow-hidden relative">
+                <div className={cn(
+                  "bg-indigo-600 rounded-[2.5rem] text-white flex flex-col md:flex-row items-center justify-between gap-4 overflow-hidden relative",
+                  viewMode === 'mobile' ? "mt-6 p-6" : "mt-10 p-8"
+                )}>
                   <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-20 -mt-20 blur-3xl"></div>
                   <div className="relative z-10">
-                    <h3 className="text-2xl font-bold mb-2">发布您的企业需求</h3>
-                    <p className="text-indigo-100/80 text-sm">入驻小湾生态，精准对接长三角优质资源。</p>
+                    <h3 className={cn("font-bold mb-1", viewMode === 'mobile' ? "text-lg" : "text-2xl")}>发布您的企业需求</h3>
+                    <p className="text-indigo-100/80 text-[10px]">入驻小湾生态，精准对接长三角优质资源。</p>
                   </div>
-                  <button className="relative z-10 px-8 py-4 bg-white text-indigo-600 rounded-2xl font-bold hover:bg-indigo-50 transition-all shadow-lg">
+                  <button className={cn("relative z-10 bg-white text-indigo-600 rounded-2xl font-bold hover:bg-indigo-50 transition-all shadow-lg", viewMode === 'mobile' ? "px-6 py-3 text-xs" : "px-8 py-4")}>
                     立即免费入驻
                   </button>
                 </div>
               </div>
 
               {/* Featured Services Section */}
-              <div className="mt-24 text-left">
-                <div className="flex justify-between items-end mb-10">
+              <div className={cn(viewMode === 'mobile' ? "mt-12" : "mt-24", "text-left")}>
+                <div className={cn("flex justify-between items-end", viewMode === 'mobile' ? "mb-4" : "mb-10")}>
                   <div>
-                    <h2 className="text-3xl font-bold text-slate-900 mb-2">热门服务专区</h2>
-                    <p className="text-slate-500">根据当前行业趋势为您推荐的高频服务</p>
+                    <h2 className={cn("font-bold text-slate-900 mb-1", viewMode === 'mobile' ? "text-xl" : "text-3xl")}>热门服务专区</h2>
+                    <p className={cn("text-slate-500", viewMode === 'mobile' ? "text-[10px]" : "text-sm")}>根据当前行业趋势为您推荐的高频服务</p>
                   </div>
-                  <button className="text-indigo-600 font-bold flex items-center gap-1 hover:gap-2 transition-all">
-                    查看全部服务 <ChevronRight size={20} />
+                  <button className="text-indigo-600 font-bold flex items-center gap-1 hover:gap-2 transition-all text-xs">
+                    全部服务 <ChevronRight size={16} />
                   </button>
                 </div>
 
@@ -870,52 +929,46 @@ export default function App() {
               key="confirming"
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="max-w-5xl mx-auto"
+              className={cn("max-w-5xl mx-auto", viewMode === 'mobile' ? "px-2" : "")}
             >
-              <div className="flex justify-between items-center mb-8">
+              <div className={cn("flex justify-between items-center", viewMode === 'mobile' ? "mb-4" : "mb-8")}>
                 <button 
                   onClick={() => setStep('landing')}
-                  className="flex items-center gap-2 text-slate-500 hover:text-indigo-600 transition-colors font-medium"
+                  className="flex items-center gap-2 text-slate-500 hover:text-indigo-600 transition-colors font-medium text-sm"
                 >
-                  <ArrowLeft size={18} /> 返回重新搜索
+                  <ArrowLeft size={16} /> 返回
                 </button>
-                <div className="flex items-center gap-2 text-xs font-bold text-indigo-600 bg-indigo-50 px-4 py-2 rounded-full">
+                <div className={cn("flex items-center gap-2 font-bold text-indigo-600 bg-indigo-50 rounded-full", viewMode === 'mobile' ? "px-3 py-1.5 text-[10px]" : "px-4 py-2 text-xs")}>
                   <Sparkles size={14} />
-                  AI 已为您初步生成画像，请核实关键信息以确保预测准确
+                  {viewMode === 'mobile' ? '请核实关键信息' : 'AI 已为您初步生成画像，请核实关键信息以确保预测准确'}
                 </div>
               </div>
 
-              <div className="grid lg:grid-cols-3 gap-8">
+              <div className={cn("grid gap-6", viewMode === 'mobile' ? "grid-cols-1" : "lg:grid-cols-3")}>
                 {/* Left Column: Core Identity */}
-                <div className="lg:col-span-2 space-y-6">
+                <div className={cn("space-y-4", viewMode === 'mobile' ? "" : "lg:col-span-2")}>
                   {/* Company Name Verification */}
-                  <div className="bg-white rounded-3xl shadow-sm border border-slate-200 p-8">
-                    <div className="flex justify-between items-start mb-6">
+                  <div className={cn("bg-white rounded-3xl shadow-sm border border-slate-200", viewMode === 'mobile' ? "p-4" : "p-8")}>
+                    <div className={cn("flex justify-between items-start", viewMode === 'mobile' ? "mb-3" : "mb-6")}>
                       <div>
-                        <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-1">企业主体名称</h3>
+                        <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">企业主体名称</h3>
                         {isEditingName ? (
                           <div className="flex gap-2 mt-2">
                             <input 
                               type="text" 
                               value={tempName}
                               onChange={(e) => setTempName(e.target.value)}
-                              className="flex-1 px-4 py-2 bg-slate-50 border border-indigo-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none"
+                              className="flex-1 px-3 py-1.5 bg-slate-50 border border-indigo-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none text-sm"
                             />
                             <button 
                               onClick={() => handleSearch(tempName)}
-                              className="bg-indigo-600 text-white px-4 py-2 rounded-xl text-sm font-bold hover:bg-indigo-700 transition-all"
+                              className="bg-indigo-600 text-white px-3 py-1.5 rounded-xl text-[10px] font-bold hover:bg-indigo-700 transition-all"
                             >
                               重新生成
                             </button>
-                            <button 
-                              onClick={() => setIsEditingName(false)}
-                              className="px-4 py-2 text-slate-400 hover:text-slate-600 text-sm font-bold"
-                            >
-                              取消
-                            </button>
                           </div>
                         ) : (
-                          <h2 className="text-3xl font-bold text-slate-900">{profile.name}</h2>
+                          <h2 className={cn("font-bold text-slate-900", viewMode === 'mobile' ? "text-xl" : "text-3xl")}>{profile.name}</h2>
                         )}
                       </div>
                       {!isEditingName && (
@@ -924,36 +977,36 @@ export default function App() {
                             setTempName(profile.name);
                             setIsEditingName(true);
                           }}
-                          className="text-indigo-600 text-xs font-bold flex items-center gap-1 hover:underline"
+                          className="text-indigo-600 text-[10px] font-bold flex items-center gap-1 hover:underline"
                         >
-                          <Edit3 size={14} /> 修改名称
+                          <Edit3 size={12} /> 修改
                         </button>
                       )}
                     </div>
                     {isEditingName && (
-                      <div className="p-4 bg-amber-50 rounded-2xl border border-amber-100 flex gap-3 items-start">
-                        <AlertCircle className="text-amber-600 shrink-0" size={18} />
-                        <p className="text-xs text-amber-700 leading-relaxed">
-                          提示：修改企业名称后，系统将清除当前所有分析数据并基于新名称重新进行全网检索与推演。
+                      <div className="p-3 bg-amber-50 rounded-2xl border border-amber-100 flex gap-2 items-start">
+                        <AlertCircle className="text-amber-600 shrink-0" size={14} />
+                        <p className="text-[10px] text-amber-700 leading-relaxed">
+                          提示：修改名称后将重新进行全网检索与推演。
                         </p>
                       </div>
                     )}
                   </div>
 
                   {/* Growth Conditions Verification - SELECTION BASED */}
-                  <div className="bg-white rounded-3xl shadow-sm border border-slate-200 p-8">
-                    <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-8">请核对初步诊断结果</h3>
+                  <div className={cn("bg-white rounded-3xl shadow-sm border border-slate-200", viewMode === 'mobile' ? "p-4" : "p-8")}>
+                    <h3 className={cn("text-[10px] font-bold text-slate-400 uppercase tracking-wider", viewMode === 'mobile' ? "mb-4" : "mb-8")}>请核对初步诊断结果</h3>
                     
-                    <div className="grid md:grid-cols-2 gap-8">
+                    <div className={cn("grid gap-4", viewMode === 'mobile' ? "grid-cols-1" : "md:grid-cols-2")}>
                       {/* Industry Selection */}
-                      <div className="space-y-3">
-                        <label className="text-sm font-bold text-slate-700 flex items-center gap-2">
-                          <Globe size={16} className="text-indigo-500" /> 所属行业领域
+                      <div className="space-y-1.5">
+                        <label className="text-[10px] font-bold text-slate-700 flex items-center gap-2">
+                          <Globe size={14} className="text-indigo-500" /> 所属行业领域
                         </label>
                         <select 
                           value={profile.industry}
                           onChange={(e) => setProfile(prev => prev ? { ...prev, industry: e.target.value } : null)}
-                          className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-indigo-500 outline-none text-sm"
+                          className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none text-xs"
                         >
                           {["大数据/人工智能", "生物医药", "新能源", "智能制造", "集成电路", "科技金融", "现代服务业", "其他"].map(opt => (
                             <option key={opt} value={opt}>{opt}</option>
@@ -962,14 +1015,14 @@ export default function App() {
                       </div>
 
                       {/* Stage Selection */}
-                      <div className="space-y-3">
-                        <label className="text-sm font-bold text-slate-700 flex items-center gap-2">
-                          <TrendingUp size={16} className="text-indigo-500" /> 当前发展阶段
+                      <div className="space-y-1.5">
+                        <label className="text-[10px] font-bold text-slate-700 flex items-center gap-2">
+                          <TrendingUp size={14} className="text-indigo-500" /> 当前发展阶段
                         </label>
                         <select 
                           value={profile.stage}
                           onChange={(e) => setProfile(prev => prev ? { ...prev, stage: e.target.value as any } : null)}
-                          className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-indigo-500 outline-none text-sm"
+                          className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none text-xs"
                         >
                           {["种子期", "初创期", "成长期", "成熟期"].map(opt => (
                             <option key={opt} value={opt}>{opt}</option>
@@ -978,14 +1031,14 @@ export default function App() {
                       </div>
 
                       {/* Revenue Selection */}
-                      <div className="space-y-3">
-                        <label className="text-sm font-bold text-slate-700 flex items-center gap-2">
-                          <Coins size={16} className="text-indigo-500" /> 年度营收规模
+                      <div className="space-y-1.5">
+                        <label className="text-[10px] font-bold text-slate-700 flex items-center gap-2">
+                          <Coins size={14} className="text-indigo-500" /> 年度营收规模
                         </label>
                         <select 
                           value={profile.revenue}
                           onChange={(e) => setProfile(prev => prev ? { ...prev, revenue: e.target.value } : null)}
-                          className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-indigo-500 outline-none text-sm"
+                          className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none text-xs"
                         >
                           {["< 100万", "100万 - 500万", "500万 - 2000万", "2000万 - 1亿", "> 1亿"].map(opt => (
                             <option key={opt} value={opt}>{opt}</option>
@@ -994,14 +1047,14 @@ export default function App() {
                       </div>
 
                       {/* Employee Selection */}
-                      <div className="space-y-3">
-                        <label className="text-sm font-bold text-slate-700 flex items-center gap-2">
-                          <Users size={16} className="text-indigo-500" /> 人员团队规模
+                      <div className="space-y-1.5">
+                        <label className="text-[10px] font-bold text-slate-700 flex items-center gap-2">
+                          <Users size={14} className="text-indigo-500" /> 人员团队规模
                         </label>
                         <select 
                           value={profile.employeeCount}
                           onChange={(e) => setProfile(prev => prev ? { ...prev, employeeCount: e.target.value } : null)}
-                          className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-indigo-500 outline-none text-sm"
+                          className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none text-xs"
                         >
                           {["< 20人", "20 - 50人", "50 - 200人", "200 - 500人", "> 500人"].map(opt => (
                             <option key={opt} value={opt}>{opt}</option>
@@ -1010,17 +1063,17 @@ export default function App() {
                       </div>
 
                       {/* Primary Goal Selection */}
-                      <div className="space-y-3 md:col-span-2">
-                        <label className="text-sm font-bold text-slate-700 flex items-center gap-2">
-                          <Rocket size={16} className="text-indigo-500" /> 近期核心成长目标 (影响预测重心)
+                      <div className="space-y-1.5 md:col-span-2">
+                        <label className="text-[10px] font-bold text-slate-700 flex items-center gap-2">
+                          <Rocket size={14} className="text-indigo-500" /> 近期核心成长目标
                         </label>
-                        <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+                        <div className={cn("grid gap-2", viewMode === 'mobile' ? "grid-cols-3" : "grid-cols-2 md:grid-cols-5")}>
                           {["融资扩张", "政策申报", "技术研发", "市场开拓", "上市准备"].map(opt => (
                             <button 
                               key={opt}
                               onClick={() => setProfile(prev => prev ? { ...prev, primaryGoal: opt } : null)}
                               className={cn(
-                                "px-4 py-2 rounded-xl text-xs font-bold border transition-all",
+                                "px-2 py-1.5 rounded-xl text-[10px] font-bold border transition-all",
                                 profile.primaryGoal === opt 
                                   ? "bg-indigo-600 border-indigo-600 text-white shadow-md shadow-indigo-200" 
                                   : "bg-white border-slate-200 text-slate-500 hover:border-indigo-300 hover:text-indigo-600"
@@ -1036,9 +1089,9 @@ export default function App() {
                 </div>
 
                 {/* Right Column: Summary & Action */}
-                <div className="space-y-6">
-                  <div className="bg-slate-900 text-white rounded-3xl p-8 shadow-xl sticky top-24">
-                    <h3 className="text-lg font-bold mb-6 flex items-center gap-2">
+                <div className="space-y-4">
+                  <div className={cn("bg-slate-900 text-white rounded-3xl shadow-xl sticky top-24", viewMode === 'mobile' ? "p-6" : "p-8")}>
+                    <h3 className={cn("font-bold flex items-center gap-2", viewMode === 'mobile' ? "text-base mb-4" : "text-lg mb-6")}>
                       <Sparkles className="text-indigo-400" size={20} />
                       诊断摘要
                     </h3>
@@ -1091,54 +1144,57 @@ export default function App() {
               key="dashboard"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="space-y-8"
+              className={cn(viewMode === 'mobile' ? "space-y-4" : "space-y-8")}
             >
               <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div className="flex items-center gap-4">
                   <button 
                     onClick={() => setStep('confirming')}
-                    className="p-3 bg-white border border-slate-200 rounded-2xl text-slate-400 hover:text-indigo-600 hover:border-indigo-200 transition-all shadow-sm"
+                    className="p-2 bg-white border border-slate-200 rounded-xl text-slate-400 hover:text-indigo-600 hover:border-indigo-200 transition-all shadow-sm"
                     title="返回核实界面"
                   >
-                    <ArrowLeft size={20} />
+                    <ArrowLeft size={18} />
                   </button>
                   <div>
-                    <h1 className="text-3xl font-bold">{profile.name} · 成长导航</h1>
-                    <p className="text-slate-500">基于数百万企业发展案例库 AI 推演的未来 10 年发展轨迹</p>
+                    <h1 className={cn("font-bold", viewMode === 'mobile' ? "text-xl" : "text-3xl")}>{profile.name} · 成长导航</h1>
+                    <p className={cn("text-slate-500", viewMode === 'mobile' ? "text-[10px]" : "text-sm")}>基于数百万企业发展案例库 AI 推演的未来 10 年发展轨迹</p>
                   </div>
                 </div>
-                <div className="flex gap-3">
-                  <button className="bg-white border border-slate-200 px-4 py-2 rounded-xl text-sm font-semibold hover:bg-slate-50 transition-all flex items-center gap-2">
-                    <Share2 size={16} className="text-indigo-600" />
-                    分享成长报告
+                <div className="flex gap-2">
+                  <button className="bg-white border border-slate-200 px-3 py-1.5 rounded-lg text-[10px] font-semibold hover:bg-slate-50 transition-all flex items-center gap-1.5">
+                    <Share2 size={14} className="text-indigo-600" />
+                    分享报告
                   </button>
-                  <button className="bg-indigo-600 text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-indigo-700 transition-all flex items-center gap-2">
-                    联系专属顾问
+                  <button className="bg-indigo-600 text-white px-3 py-1.5 rounded-lg text-[10px] font-semibold hover:bg-indigo-700 transition-all flex items-center gap-1.5">
+                    联系顾问
                   </button>
                 </div>
               </div>
 
               {/* Grid Layout */}
-              <div className="grid lg:grid-cols-3 gap-8">
+              <div className={cn("grid gap-4 lg:gap-8", viewMode === 'mobile' ? "grid-cols-1" : "lg:grid-cols-3")}>
                 {/* Growth Prediction */}
-                <div className="lg:col-span-2 bg-white p-8 rounded-3xl shadow-sm border border-slate-200">
-                  <div className="flex justify-between items-center mb-8">
-                    <h3 className="text-xl font-bold flex items-center gap-2">
-                      <TrendingUp className="text-indigo-600" size={24} />
+                <div className={cn(
+                  "bg-white rounded-3xl shadow-sm border border-slate-200",
+                  viewMode === 'mobile' ? "p-4 lg:col-span-2" : "p-8 lg:col-span-2"
+                )}>
+                  <div className={cn("flex justify-between items-center", viewMode === 'mobile' ? "mb-4" : "mb-8")}>
+                    <h3 className={cn("font-bold flex items-center gap-2", viewMode === 'mobile' ? "text-base" : "text-xl")}>
+                      <TrendingUp className="text-indigo-600" size={viewMode === 'mobile' ? 18 : 24} />
                       成长潜力预测
                     </h3>
-                    <div className="flex gap-4 text-xs font-bold uppercase tracking-wider">
-                      <div className="flex items-center gap-1.5">
-                        <div className="w-3 h-3 bg-indigo-600 rounded-full"></div>
-                        <span>历史数据</span>
+                    <div className="flex gap-2 text-[8px] font-bold uppercase tracking-wider">
+                      <div className="flex items-center gap-1">
+                        <div className="w-2 h-2 bg-indigo-600 rounded-full"></div>
+                        <span>历史</span>
                       </div>
-                      <div className="flex items-center gap-1.5">
-                        <div className="w-3 h-3 bg-indigo-300 rounded-full"></div>
-                        <span>AI 预测</span>
+                      <div className="flex items-center gap-1">
+                        <div className="w-2 h-2 bg-indigo-300 rounded-full"></div>
+                        <span>预测</span>
                       </div>
                     </div>
                   </div>
-                  <div className="h-[300px] w-full">
+                  <div className={cn("w-full", viewMode === 'mobile' ? "h-[200px]" : "h-[300px]")}>
                     <ResponsiveContainer width="100%" height="100%">
                       <AreaChart data={growthData}>
                         <defs>
@@ -1237,7 +1293,7 @@ export default function App() {
                             value: '当前节点', 
                             position: 'top', 
                             fill: '#4F46E5', 
-                            fontSize: 12, 
+                            fontSize: viewMode === 'mobile' ? 10 : 12, 
                             fontWeight: 'bold',
                             dy: -10
                           }} 
@@ -1261,7 +1317,7 @@ export default function App() {
                                 offset={12}
                                 style={{ 
                                   fill: '#4338CA', 
-                                  fontSize: '11px', 
+                                  fontSize: viewMode === 'mobile' ? '9px' : '11px', 
                                   fontWeight: '700'
                                 }}
                               />
@@ -1271,9 +1327,9 @@ export default function App() {
                       </AreaChart>
                     </ResponsiveContainer>
                   </div>
-                  <div className="mt-6 p-4 bg-indigo-50 rounded-2xl border border-indigo-100 flex items-start gap-3">
-                    <Sparkles className="text-indigo-600 shrink-0" size={20} />
-                    <p className="text-sm text-indigo-900">
+                  <div className={cn("bg-indigo-50 rounded-2xl border border-indigo-100 flex items-start gap-3", viewMode === 'mobile' ? "mt-4 p-3" : "mt-6 p-4")}>
+                    <Sparkles className="text-indigo-600 shrink-0" size={viewMode === 'mobile' ? 16 : 20} />
+                    <p className={cn("text-indigo-900", viewMode === 'mobile' ? "text-xs" : "text-sm")}>
                       {profile.name.includes('商汤') 
                         ? "AI 深度分析：基于数百万企业案例库推演，商汤科技在通用大模型 SenseNova 的持续投入已进入产出期。未来 10 年，随着 AIDC 算力租赁的毛利贡献增加，企业将进入指数级增长阶段。"
                         : `AI 深度分析：基于数百万企业案例库推演，由于您在${profile.keyTech[0]}领域的持续投入，预计未来 10 年将迎来业务爆发期，建议提前储备人才与服务器资源。`}
@@ -1292,29 +1348,32 @@ export default function App() {
                   </div>
 
                   {/* Growth Roadmap - Redesigned as a visual path */}
-                  <div className="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm mt-10">
-                    <div className="flex justify-between items-end mb-10">
+                  <div className={cn(
+                    "bg-white rounded-3xl border border-slate-200 shadow-sm",
+                    viewMode === 'mobile' ? "p-4 mt-4" : "p-8 mt-10"
+                  )}>
+                    <div className={cn("flex justify-between items-end", viewMode === 'mobile' ? "mb-4" : "mb-10")}>
                       <div>
-                        <h3 className="text-xl font-bold flex items-center gap-2 mb-1">
-                          <Map className="text-indigo-600" size={24} />
+                        <h3 className={cn("font-bold flex items-center gap-2 mb-1", viewMode === 'mobile' ? "text-base" : "text-xl")}>
+                          <Map className="text-indigo-600" size={viewMode === 'mobile' ? 18 : 24} />
                           企业成长路线图
                         </h3>
-                        <p className="text-xs text-slate-500">基于 AI 预测为您定制的行动路径，每一步都是成长的里程碑</p>
+                        <p className="text-[10px] text-slate-500">基于 AI 预测为您定制的行动路径</p>
                       </div>
                       <div className="text-right">
                         <div className="flex items-center gap-2 justify-end mb-1">
-                          <span className="text-3xl font-black text-indigo-600">25%</span>
-                          <div className="w-24 h-2 bg-slate-100 rounded-full overflow-hidden">
+                          <span className={cn("font-black text-indigo-600", viewMode === 'mobile' ? "text-xl" : "text-3xl")}>25%</span>
+                          <div className={cn("bg-slate-100 rounded-full overflow-hidden", viewMode === 'mobile' ? "w-16 h-1.5" : "w-24 h-2")}>
                             <div className="h-full bg-indigo-600" style={{ width: '25%' }}></div>
                           </div>
                         </div>
-                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">整体完成进度</span>
+                        <span className="text-[8px] font-bold text-slate-400 uppercase tracking-wider">进度</span>
                       </div>
                     </div>
 
-                    <div className="relative pl-8 space-y-0">
+                    <div className={cn("relative space-y-0", viewMode === 'mobile' ? "pl-6" : "pl-8")}>
                       {/* Vertical Path Line */}
-                      <div className="absolute left-[11px] top-2 bottom-2 w-0.5 bg-slate-100">
+                      <div className={cn("absolute top-2 bottom-2 w-0.5 bg-slate-100", viewMode === 'mobile' ? "left-[9px]" : "left-[11px]")}>
                         <div className="absolute top-0 left-0 w-full bg-indigo-600 transition-all duration-1000" style={{ height: '25%' }}></div>
                       </div>
 
@@ -1322,30 +1381,32 @@ export default function App() {
                         <div 
                           key={task.id}
                           onClick={() => toggleTask(task.id)}
-                          className="relative pb-8 last:pb-0 group cursor-pointer"
+                          className={cn("relative group cursor-pointer", viewMode === 'mobile' ? "pb-4" : "pb-8")}
                         >
                           {/* Node Dot */}
                           <div className={cn(
-                            "absolute left-[-29px] top-1 w-6 h-6 rounded-full border-4 border-white shadow-sm flex items-center justify-center z-10 transition-all",
+                            "absolute top-1 rounded-full border-4 border-white shadow-sm flex items-center justify-center z-10 transition-all",
+                            viewMode === 'mobile' ? "left-[-23px] w-4 h-4" : "left-[-29px] w-6 h-6",
                             task.status === 'completed' ? "bg-emerald-500 scale-110" : 
                             task.status === 'in-progress' ? "bg-indigo-600 animate-pulse scale-125" :
                             "bg-slate-200"
                           )}>
-                            {task.status === 'completed' && <Check size={12} className="text-white" />}
-                            {task.status === 'in-progress' && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
+                            {task.status === 'completed' && <Check size={viewMode === 'mobile' ? 8 : 12} className="text-white" />}
+                            {task.status === 'in-progress' && <div className={cn("rounded-full bg-white", viewMode === 'mobile' ? "w-1 h-1" : "w-1.5 h-1.5")} />}
                           </div>
 
                           <div className={cn(
-                            "p-5 rounded-2xl border transition-all",
+                            "rounded-2xl border transition-all",
+                            viewMode === 'mobile' ? "p-3" : "p-5",
                             task.status === 'completed' ? "bg-emerald-50/50 border-emerald-100" : 
                             task.status === 'in-progress' ? "bg-white border-indigo-200 shadow-md -translate-y-1" :
                             "bg-white border-slate-100 hover:border-indigo-200"
                           )}>
-                            <div className="flex justify-between items-start gap-4">
+                            <div className="flex justify-between items-start gap-2">
                               <div>
-                                <div className="flex items-center gap-2 mb-1">
+                                <div className="flex items-center gap-2 mb-0.5">
                                   <span className={cn(
-                                    "text-[9px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider",
+                                    "text-[8px] font-bold px-1.5 py-0.5 rounded-full uppercase tracking-wider",
                                     task.category === '财务' ? "bg-blue-100 text-blue-600" :
                                     task.category === '技术' ? "bg-purple-100 text-purple-600" :
                                     task.category === '人才' ? "bg-orange-100 text-orange-600" :
@@ -1353,10 +1414,11 @@ export default function App() {
                                   )}>
                                     {task.category}
                                   </span>
-                                  <span className="text-[9px] text-slate-400 font-medium">阶段 {index + 1}</span>
+                                  <span className="text-[8px] text-slate-400 font-medium">阶段 {index + 1}</span>
                                 </div>
                                 <h4 className={cn(
-                                  "text-sm font-bold",
+                                  "font-bold leading-tight",
+                                  viewMode === 'mobile' ? "text-xs" : "text-sm",
                                   task.status === 'completed' ? "text-emerald-900 line-through opacity-60" : "text-slate-800"
                                 )}>
                                   {task.task}
@@ -1364,11 +1426,11 @@ export default function App() {
                               </div>
                               <div className="shrink-0">
                                 {task.status === 'completed' ? (
-                                  <span className="text-[10px] font-bold text-emerald-600 bg-emerald-100 px-2 py-1 rounded-lg">已达成</span>
+                                  <span className="text-[8px] font-bold text-emerald-600 bg-emerald-100 px-1.5 py-0.5 rounded-lg">已达成</span>
                                 ) : task.status === 'in-progress' ? (
-                                  <span className="text-[10px] font-bold text-indigo-600 bg-indigo-50 px-2 py-1 rounded-lg">进行中</span>
+                                  <span className="text-[8px] font-bold text-indigo-600 bg-indigo-50 px-1.5 py-0.5 rounded-lg">进行中</span>
                                 ) : (
-                                  <span className="text-[10px] font-bold text-slate-400 bg-slate-50 px-2 py-1 rounded-lg">待启动</span>
+                                  <span className="text-[8px] font-bold text-slate-400 bg-slate-50 px-1.5 py-0.5 rounded-lg">待启动</span>
                                 )}
                               </div>
                             </div>
@@ -1391,62 +1453,65 @@ export default function App() {
                 {/* Sidebar: Chat & Elements */}
                 <div className="space-y-8">
                   {/* Growth Chat Dialog - Enhanced with preset elements */}
-                  <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden flex flex-col h-[700px]">
-                    <div className="bg-slate-900 px-6 py-5 text-white flex justify-between items-center">
+                  <div className={cn(
+                    "bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden flex flex-col",
+                    viewMode === 'mobile' ? "h-[400px]" : "h-[500px] lg:h-[700px]"
+                  )}>
+                    <div className={cn("bg-slate-900 text-white flex justify-between items-center", viewMode === 'mobile' ? "px-4 py-3" : "px-6 py-5")}>
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
-                          <MessageSquare size={16} />
+                        <div className={cn("bg-indigo-600 rounded-lg flex items-center justify-center", viewMode === 'mobile' ? "w-6 h-6" : "w-8 h-8")}>
+                          <MessageSquare size={viewMode === 'mobile' ? 12 : 16} />
                         </div>
                         <div>
-                          <h3 className="font-bold text-sm">成长咨询助手</h3>
-                          <p className="text-[10px] text-slate-400">AI 专家实时在线，深度解析企业潜力</p>
+                          <h3 className={cn("font-bold", viewMode === 'mobile' ? "text-xs" : "text-sm")}>成长咨询助手</h3>
+                          <p className="text-[8px] text-slate-400">AI 专家实时在线</p>
                         </div>
                       </div>
-                      <div className="flex items-center gap-1.5 text-[10px] font-bold bg-white/10 px-2 py-1 rounded-full">
+                      <div className="flex items-center gap-1.5 text-[8px] font-bold bg-white/10 px-2 py-1 rounded-full">
                         <div className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse"></div>
                         在线
                       </div>
                     </div>
                     
-                    <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-slate-50/30">
+                    <div className={cn("flex-1 overflow-y-auto space-y-4 bg-slate-50/30 scrollbar-hide", viewMode === 'mobile' ? "p-4" : "p-6")}>
                       {dashboardMessages.length === 0 && (
-                        <div className="space-y-6">
-                          <div className="flex flex-col items-center justify-center text-center space-y-3 py-6">
-                            <div className="w-12 h-12 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center">
-                              <Sparkles size={24} />
+                        <div className={cn("space-y-4", viewMode === 'mobile' ? "space-y-3" : "space-y-6")}>
+                          <div className={cn("flex flex-col items-center justify-center text-center space-y-2", viewMode === 'mobile' ? "py-2" : "py-6")}>
+                            <div className={cn("bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center", viewMode === 'mobile' ? "w-8 h-8" : "w-12 h-12")}>
+                              <Sparkles size={viewMode === 'mobile' ? 16 : 24} />
                             </div>
                             <div>
-                              <p className="text-sm font-bold text-slate-900">您好！我是您的小湾成长助手</p>
-                              <p className="text-[10px] text-slate-500 mt-1">您可以直接提问，或查看下方的 AI 推荐要素</p>
+                              <p className={cn("font-bold text-slate-900", viewMode === 'mobile' ? "text-xs" : "text-sm")}>您好！我是您的小湾成长助手</p>
+                              <p className="text-[8px] text-slate-500 mt-0.5">您可以提问，或查看 AI 推荐要素</p>
                             </div>
                           </div>
 
                           {/* Integrated Recommended Elements */}
-                          <div className="space-y-3">
-                            <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">AI 推荐要素</h4>
-                            <div className="grid gap-3">
+                          <div className="space-y-2">
+                            <h4 className="text-[8px] font-bold text-slate-400 uppercase tracking-widest px-1">AI 推荐要素</h4>
+                            <div className="grid gap-2">
                               <div 
                                 onClick={() => setDashboardInput("如何对接高级算法工程师人才库？")}
-                                className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm hover:border-indigo-300 transition-all cursor-pointer group"
+                                className={cn("bg-white rounded-2xl border border-slate-100 shadow-sm hover:border-indigo-300 transition-all cursor-pointer group", viewMode === 'mobile' ? "p-3" : "p-4")}
                               >
-                                <div className="flex justify-between items-start mb-2">
-                                  <span className="text-[10px] font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded">人才缺口</span>
-                                  <ChevronRight size={14} className="text-slate-300 group-hover:text-indigo-600 transition-colors" />
+                                <div className="flex justify-between items-start mb-1">
+                                  <span className="text-[8px] font-bold text-indigo-600 bg-indigo-50 px-1.5 py-0.5 rounded">人才缺口</span>
+                                  <ChevronRight size={12} className="text-slate-300 group-hover:text-indigo-600 transition-colors" />
                                 </div>
-                                <div className="text-xs font-bold text-slate-800">高级算法工程师 (3名)</div>
-                                <p className="text-[10px] text-slate-500 mt-1">匹配小湾人才库，已锁定 12 名候选人</p>
+                                <div className={cn("font-bold text-slate-800", viewMode === 'mobile' ? "text-[10px]" : "text-xs")}>高级算法工程师 (3名)</div>
+                                <p className="text-[8px] text-slate-500 mt-0.5">匹配小湾人才库，已锁定 12 名候选人</p>
                               </div>
 
                               <div 
                                 onClick={() => setDashboardInput("帮我分析一下高新技术企业认定申报条件")}
-                                className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm hover:border-orange-300 transition-all cursor-pointer group"
+                                className={cn("bg-white rounded-2xl border border-slate-100 shadow-sm hover:border-orange-300 transition-all cursor-pointer group", viewMode === 'mobile' ? "p-3" : "p-4")}
                               >
-                                <div className="flex justify-between items-start mb-2">
-                                  <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded">政策匹配</span>
-                                  <ChevronRight size={14} className="text-slate-300 group-hover:text-emerald-600 transition-colors" />
+                                <div className="flex justify-between items-start mb-1">
+                                  <span className="text-[8px] font-bold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded">政策匹配</span>
+                                  <ChevronRight size={12} className="text-slate-300 group-hover:text-emerald-600 transition-colors" />
                                 </div>
-                                <div className="text-xs font-bold text-slate-800">高新技术企业认定</div>
-                                <p className="text-[10px] text-slate-500 mt-1">预计可减免税收 ¥200k/年</p>
+                                <div className={cn("font-bold text-slate-800", viewMode === 'mobile' ? "text-[10px]" : "text-xs")}>高新技术企业认定</div>
+                                <p className="text-[8px] text-slate-500 mt-0.5">预计可减免税收 ¥200k/年</p>
                               </div>
 
                               <div 
@@ -1542,31 +1607,36 @@ export default function App() {
                     </div>
                   </div>
 
-                  {/* Future Elements Matching - REMOVED AS IT IS NOW INTEGRATED INTO CHAT */}
-
+                  <div className={cn(
+                    "bg-slate-900 rounded-[2.5rem] text-white shadow-xl",
+                    viewMode === 'mobile' ? "p-4 space-y-4" : "p-8 space-y-8"
+                  )}>
                     {/* Join Us Card */}
-                    <div className="mt-8 p-6 bg-gradient-to-br from-indigo-600/20 to-purple-600/20 rounded-2xl border border-indigo-500/30 border-dashed group cursor-pointer hover:bg-indigo-600/30 transition-all">
-                      <div className="flex items-center gap-3 mb-3">
-                        <div className="w-10 h-10 rounded-full bg-indigo-600 flex items-center justify-center text-white group-hover:scale-110 transition-transform">
-                          <Users size={20} />
+                    <div className={cn(
+                      "bg-gradient-to-br from-indigo-600/20 to-purple-600/20 rounded-2xl border border-indigo-500/30 border-dashed group cursor-pointer hover:bg-indigo-600/30 transition-all",
+                      viewMode === 'mobile' ? "p-4" : "p-6"
+                    )}>
+                      <div className="flex items-center gap-3 mb-2">
+                        <div className={cn("rounded-full bg-indigo-600 flex items-center justify-center text-white group-hover:scale-110 transition-transform", viewMode === 'mobile' ? "w-8 h-8" : "w-10 h-10")}>
+                          <Users size={viewMode === 'mobile' ? 16 : 20} />
                         </div>
-                        <h4 className="font-bold text-indigo-100">加入小湾生态圈</h4>
+                        <h4 className={cn("font-bold text-indigo-100", viewMode === 'mobile' ? "text-xs" : "text-sm")}>加入小湾生态圈</h4>
                       </div>
-                      <p className="text-xs text-slate-400 leading-relaxed mb-4">
-                        加入我们，您的企业也将作为优质要素，出现在其他合适企业的智能匹配推荐中。同时，我们将为您<span className="text-indigo-300 font-bold">持续推送潜在商机</span>，实现生态共赢。
+                      <p className="text-[10px] text-slate-400 leading-relaxed mb-3">
+                        加入我们，您的企业也将作为优质要素，出现在其他合适企业的智能匹配推荐中。
                       </p>
-                      <button className="w-full py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold transition-colors">
+                      <button className="w-full py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-[10px] font-bold transition-colors">
                         立即入驻
                       </button>
                     </div>
 
                     {/* Success Cases - MOVED TO SIDEBAR */}
-                    <div className="mt-8 pt-8 border-t border-white/10">
-                      <div className="flex justify-between items-center mb-6">
-                        <h3 className="text-sm font-bold text-white uppercase tracking-widest">同赛道对标案例</h3>
-                        <button className="text-[10px] text-indigo-400 font-bold hover:underline">查看更多</button>
+                    <div className={cn("pt-4 border-t border-white/10", viewMode === 'mobile' ? "mt-4" : "mt-8")}>
+                      <div className="flex justify-between items-center mb-4">
+                        <h3 className="text-[10px] font-bold text-white uppercase tracking-widest">同赛道对标案例</h3>
+                        <button className="text-[8px] text-indigo-400 font-bold hover:underline">更多</button>
                       </div>
-                      <div className="space-y-4">
+                      <div className="space-y-3">
                         <div 
                           onClick={() => setSelectedCase({
                             name: "某智能视觉初创企业",
@@ -1577,15 +1647,15 @@ export default function App() {
                             details: "该企业在 A 轮融资前，通过小湾企服进行了全面的数据合规改造和专利布局优化，成功吸引了顶级 VC 关注。",
                             path: ["种子期：技术原型验证", "初创期：数据合规审计", "成长期：专利导航分析"]
                           })}
-                          className="bg-white/5 p-4 rounded-2xl border border-white/5 hover:border-indigo-500/30 transition-all cursor-pointer group"
+                          className="bg-white/5 p-3 rounded-2xl border border-white/5 hover:border-indigo-500/30 transition-all cursor-pointer group"
                         >
-                          <div className="flex gap-3 items-center">
-                            <div className="w-10 h-10 rounded-lg overflow-hidden shrink-0">
+                          <div className="flex gap-2 items-center">
+                            <div className="w-8 h-8 rounded-lg overflow-hidden shrink-0">
                               <img src="https://picsum.photos/seed/tech1/200/200" alt="Case 1" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
                             </div>
                             <div>
-                              <h5 className="text-xs font-bold text-white group-hover:text-indigo-300 transition-colors">某智能视觉初创企业</h5>
-                              <p className="text-[9px] text-slate-500 mt-0.5">估值提升 30% · 路径复刻度 85%</p>
+                              <h5 className="text-[10px] font-bold text-white group-hover:text-indigo-300 transition-colors">某智能视觉初创企业</h5>
+                              <p className="text-[8px] text-slate-500 mt-0.5">估值提升 30%</p>
                             </div>
                           </div>
                         </div>
@@ -1599,20 +1669,21 @@ export default function App() {
                             details: "利用小湾智能基金大模型，精准匹配了 3 项省级专项补贴，并由小湾顾问协助完成了申报流程。",
                             path: ["政策扫描", "条件对标", "智能申报", "获批公示"]
                           })}
-                          className="bg-white/5 p-4 rounded-2xl border border-white/5 hover:border-indigo-500/30 transition-all cursor-pointer group"
+                          className="bg-white/5 p-3 rounded-2xl border border-white/5 hover:border-indigo-500/30 transition-all cursor-pointer group"
                         >
-                          <div className="flex gap-3 items-center">
-                            <div className="w-10 h-10 rounded-lg overflow-hidden shrink-0">
+                          <div className="flex gap-2 items-center">
+                            <div className="w-8 h-8 rounded-lg overflow-hidden shrink-0">
                               <img src="https://picsum.photos/seed/tech2/200/200" alt="Case 2" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
                             </div>
                             <div>
-                              <h5 className="text-xs font-bold text-white group-hover:text-indigo-300 transition-colors">某生物医药研发平台</h5>
-                              <p className="text-[9px] text-slate-500 mt-0.5">获 500 万基金 · 路径复刻度 72%</p>
+                              <h5 className="text-[10px] font-bold text-white group-hover:text-indigo-300 transition-colors">某生物医药研发平台</h5>
+                              <p className="text-[8px] text-slate-500 mt-0.5">获 500 万基金</p>
                             </div>
                           </div>
                         </div>
                       </div>
                     </div>
+                  </div>
                   </div>
 
                 {/* Integrated Services */}
@@ -1771,7 +1842,10 @@ export default function App() {
       </AnimatePresence>
 
       {/* Mobile Bottom Nav (Simulated) */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 px-6 py-3 flex justify-between items-center z-50">
+      <div className={cn(
+        "lg:hidden bg-white border-t border-slate-200 px-6 py-3 flex justify-between items-center z-50",
+        viewMode === 'mobile' ? "sticky bottom-0" : "fixed bottom-0 left-0 right-0"
+      )}>
         <div className="flex flex-col items-center gap-1 text-indigo-600">
           <Sparkles size={20} />
           <span className="text-[10px] font-bold">首页</span>
@@ -1792,6 +1866,7 @@ export default function App() {
           <Users size={20} />
           <span className="text-[10px] font-bold">我的</span>
         </div>
+      </div>
       </div>
     </div>
   );
