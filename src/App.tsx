@@ -1155,43 +1155,46 @@ export default function App() {
               key="dashboard"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className={cn(viewMode === 'mobile' ? "space-y-4" : "space-y-8")}
+              className={cn(viewMode === 'mobile' ? "space-y-4 px-2" : "space-y-8")}
             >
-              <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                <div className="flex items-center gap-4">
+              <div className={cn(
+                "flex gap-4",
+                viewMode === 'mobile' ? "flex-col items-start" : "flex-row justify-between items-center"
+              )}>
+                <div className="flex items-center gap-3 w-full min-w-0">
                   <button 
                     onClick={() => setStep('confirming')}
-                    className="p-2 bg-white border border-slate-200 rounded-xl text-slate-400 hover:text-indigo-600 hover:border-indigo-200 transition-all shadow-sm"
+                    className="p-2 bg-white border border-slate-200 rounded-xl text-slate-400 hover:text-indigo-600 hover:border-indigo-200 transition-all shadow-sm shrink-0"
                     title="返回核实界面"
                   >
                     <ArrowLeft size={18} />
                   </button>
-                  <div>
-                    <h1 className={cn("font-bold", viewMode === 'mobile' ? "text-xl" : "text-3xl")}>{profile.name} · 成长导航</h1>
-                    <p className={cn("text-slate-500", viewMode === 'mobile' ? "text-[10px]" : "text-sm")}>基于数百万企业发展案例库 AI 推演的未来 10 年发展轨迹</p>
+                  <div className="min-w-0 flex-1">
+                    <h1 className={cn("font-bold truncate", viewMode === 'mobile' ? "text-lg" : "text-xl md:text-3xl")}>{profile.name} · 成长导航</h1>
+                    <p className={cn("text-slate-500 truncate", viewMode === 'mobile' ? "text-[10px]" : "text-xs md:text-sm")}>基于数百万企业发展案例库 AI 推演的未来 10 年发展轨迹</p>
                   </div>
                 </div>
-                <div className="flex gap-2">
-                  <button className="bg-white border border-slate-200 px-3 py-1.5 rounded-lg text-[10px] font-semibold hover:bg-slate-50 transition-all flex items-center gap-1.5">
+                <div className={cn("flex gap-2 shrink-0", viewMode === 'mobile' ? "w-full" : "w-full md:w-auto")}>
+                  <button className={cn("bg-white border border-slate-200 px-3 py-1.5 rounded-lg text-[10px] font-semibold hover:bg-slate-50 transition-all flex items-center gap-1.5 justify-center", viewMode === 'mobile' ? "flex-1" : "md:flex-none")}>
                     <Share2 size={14} className="text-indigo-600" />
                     分享报告
                   </button>
-                  <button className="bg-indigo-600 text-white px-3 py-1.5 rounded-lg text-[10px] font-semibold hover:bg-indigo-700 transition-all flex items-center gap-1.5">
+                  <button className={cn("bg-indigo-600 text-white px-3 py-1.5 rounded-lg text-[10px] font-semibold hover:bg-indigo-700 transition-all flex items-center gap-1.5 justify-center", viewMode === 'mobile' ? "flex-1" : "md:flex-none")}>
                     联系顾问
                   </button>
                 </div>
               </div>
 
               {/* Grid Layout */}
-              <div className={cn("grid gap-4 lg:gap-8", viewMode === 'mobile' ? "grid-cols-1" : "lg:grid-cols-3")}>
+              <div className={cn("grid gap-4", viewMode === 'mobile' ? "grid-cols-1" : "grid-cols-1 md:grid-cols-3 md:gap-8")}>
                 {/* Growth Prediction */}
                 <div className={cn(
-                  "bg-white rounded-3xl shadow-sm border border-slate-200",
-                  viewMode === 'mobile' ? "p-4 lg:col-span-2" : "p-8 lg:col-span-2"
+                  "bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden",
+                  viewMode === 'mobile' ? "p-4" : "p-6 md:p-8 md:col-span-2"
                 )}>
                   <div className={cn("flex justify-between items-center", viewMode === 'mobile' ? "mb-4" : "mb-8")}>
-                    <h3 className={cn("font-bold flex items-center gap-2", viewMode === 'mobile' ? "text-base" : "text-xl")}>
-                      <TrendingUp className="text-indigo-600" size={viewMode === 'mobile' ? 18 : 24} />
+                    <h3 className={cn("font-bold flex items-center gap-2 whitespace-nowrap", viewMode === 'mobile' ? "text-sm" : "text-xl")}>
+                      <TrendingUp className="text-indigo-600" size={viewMode === 'mobile' ? 16 : 24} />
                       成长潜力预测
                     </h3>
                     <div className="flex gap-2 text-[8px] font-bold uppercase tracking-wider">
@@ -1365,7 +1368,7 @@ export default function App() {
                   )}>
                     <div className={cn("flex justify-between items-end", viewMode === 'mobile' ? "mb-4" : "mb-10")}>
                       <div>
-                        <h3 className={cn("font-bold flex items-center gap-2 mb-1", viewMode === 'mobile' ? "text-base" : "text-xl")}>
+                        <h3 className={cn("font-bold flex items-center gap-2 mb-1 whitespace-nowrap", viewMode === 'mobile' ? "text-base" : "text-xl")}>
                           <Map className="text-indigo-600" size={viewMode === 'mobile' ? 18 : 24} />
                           企业成长路线图
                         </h3>
@@ -1462,11 +1465,11 @@ export default function App() {
                 </div>
 
                 {/* Sidebar: Chat & Elements */}
-                <div className="space-y-8">
+                <div className={cn("space-y-6 md:space-y-8", viewMode === 'mobile' ? "w-full" : "w-full md:col-span-1")}>
                   {/* Growth Chat Dialog - Enhanced with preset elements */}
                   <div className={cn(
                     "bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden flex flex-col",
-                    viewMode === 'mobile' ? "h-[400px]" : "h-[500px] lg:h-[700px]"
+                    viewMode === 'mobile' ? "h-[450px]" : "h-[500px] md:h-[600px] lg:h-[700px]"
                   )}>
                     <div className={cn("bg-slate-900 text-white flex justify-between items-center", viewMode === 'mobile' ? "px-4 py-3" : "px-6 py-5")}>
                       <div className="flex items-center gap-3">
