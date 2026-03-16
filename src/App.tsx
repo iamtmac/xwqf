@@ -602,14 +602,22 @@ export default function App() {
       )}>
         {step === 'landing' && <BackgroundAI />}
         {/* Navigation */}
-        <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-200 px-6 py-4 flex justify-between items-center">
+        <nav className={cn(
+          "sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-200 flex justify-between items-center",
+          viewMode === 'mobile' ? "px-4 py-3" : "px-6 py-4"
+        )}>
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-white">
-              <Sparkles size={20} />
+            <div className={cn("bg-indigo-600 rounded-lg flex items-center justify-center text-white", viewMode === 'mobile' ? "w-6 h-6" : "w-8 h-8")}>
+              <Sparkles size={viewMode === 'mobile' ? 16 : 20} />
             </div>
-            <span className="font-bold text-xl tracking-tight">小湾企服 <span className="text-indigo-600">Pro</span></span>
+            <span className={cn("font-bold tracking-tight", viewMode === 'mobile' ? "text-lg" : "text-xl")}>
+              小湾企服 <span className="text-indigo-600">Pro</span>
+            </span>
           </div>
-          <div className="hidden lg:flex items-center gap-6 text-sm font-medium text-slate-600">
+          <div className={cn(
+            "items-center gap-6 text-sm font-medium text-slate-600",
+            viewMode === 'mobile' ? "hidden" : "hidden lg:flex"
+          )}>
             <a href="#" className="hover:text-indigo-600 transition-colors">智能政策</a>
             <a href="#" className="hover:text-indigo-600 transition-colors">智能基金</a>
             <a href="#" className="hover:text-indigo-600 transition-colors">融资服务</a>
@@ -618,7 +626,7 @@ export default function App() {
               管理后台
             </button>
           </div>
-          <div className="lg:hidden">
+          <div className={cn(viewMode === 'mobile' ? "flex" : "lg:hidden")}>
             <button className="p-2 text-slate-600 hover:bg-slate-100 rounded-lg">
               <MessageSquare size={20} />
             </button>
@@ -720,7 +728,10 @@ export default function App() {
               </AnimatePresence>
 
               {/* Service Entries Grid */}
-              <div className={cn("grid grid-cols-2 md:grid-cols-4 gap-3 max-w-4xl mx-auto", viewMode === 'mobile' ? "mb-8" : "mb-16")}>
+              <div className={cn(
+                "grid gap-3 max-w-4xl mx-auto",
+                viewMode === 'mobile' ? "grid-cols-2 mb-8" : "grid-cols-2 md:grid-cols-4 mb-16"
+              )}>
                 <div 
                   onClick={() => generateSolution('policy')}
                   className={cn("bg-white rounded-3xl border border-slate-200 hover:border-indigo-300 hover:shadow-lg transition-all cursor-pointer group", viewMode === 'mobile' ? "p-3" : "p-6")}
@@ -759,22 +770,22 @@ export default function App() {
                 </div>
               </div>
               
-              <div className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-8 opacity-60">
-                <div className="flex flex-col items-center gap-2">
-                  <div className="text-2xl font-bold">10k+</div>
-                  <div className="text-xs uppercase tracking-widest font-semibold">服务企业</div>
+              <div className={cn(viewMode === 'mobile' ? "mt-12" : "mt-16", "grid gap-8 opacity-60", viewMode === 'mobile' ? "grid-cols-2" : "grid-cols-2 md:grid-cols-4")}>
+                <div className="flex flex-col items-center gap-1">
+                  <div className={cn("font-bold", viewMode === 'mobile' ? "text-xl" : "text-2xl")}>10k+</div>
+                  <div className="text-[10px] uppercase tracking-widest font-semibold">服务企业</div>
                 </div>
-                <div className="flex flex-col items-center gap-2">
-                  <div className="text-2xl font-bold">¥50B+</div>
-                  <div className="text-xs uppercase tracking-widest font-semibold">撮合融资</div>
+                <div className="flex flex-col items-center gap-1">
+                  <div className={cn("font-bold", viewMode === 'mobile' ? "text-xl" : "text-2xl")}>¥50B+</div>
+                  <div className="text-[10px] uppercase tracking-widest font-semibold">撮合融资</div>
                 </div>
-                <div className="flex flex-col items-center gap-2">
-                  <div className="text-2xl font-bold">98%</div>
-                  <div className="text-xs uppercase tracking-widest font-semibold">精准匹配率</div>
+                <div className="flex flex-col items-center gap-1">
+                  <div className={cn("font-bold", viewMode === 'mobile' ? "text-xl" : "text-2xl")}>98%</div>
+                  <div className="text-[10px] uppercase tracking-widest font-semibold">精准匹配率</div>
                 </div>
-                <div className="flex flex-col items-center gap-2">
-                  <div className="text-2xl font-bold">24/7</div>
-                  <div className="text-xs uppercase tracking-widest font-semibold">智能监控</div>
+                <div className="flex flex-col items-center gap-1">
+                  <div className={cn("font-bold", viewMode === 'mobile' ? "text-xl" : "text-2xl")}>24/7</div>
+                  <div className="text-[10px] uppercase tracking-widest font-semibold">智能监控</div>
                 </div>
               </div>
 
@@ -853,42 +864,42 @@ export default function App() {
                   </button>
                 </div>
 
-                <div className="grid md:grid-cols-3 gap-8">
-                  <div className="bg-white p-8 rounded-[2.5rem] border border-slate-200 hover:shadow-xl transition-all group">
-                    <div className="w-14 h-14 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-indigo-600 group-hover:text-white transition-all">
-                      <BarChart3 size={28} />
+                <div className={cn("grid gap-6", viewMode === 'mobile' ? "grid-cols-1" : "md:grid-cols-3")}>
+                  <div className={cn("bg-white rounded-[2.5rem] border border-slate-200 hover:shadow-xl transition-all group", viewMode === 'mobile' ? "p-6" : "p-8")}>
+                    <div className={cn("bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center group-hover:bg-indigo-600 group-hover:text-white transition-all", viewMode === 'mobile' ? "w-12 h-12 mb-4" : "w-14 h-14 mb-6")}>
+                      <BarChart3 size={viewMode === 'mobile' ? 24 : 28} />
                     </div>
-                    <h3 className="text-xl font-bold mb-3">融资路演诊断</h3>
-                    <p className="text-slate-500 text-sm leading-relaxed mb-6">
+                    <h3 className={cn("font-bold mb-2", viewMode === 'mobile' ? "text-lg" : "text-xl")}>融资路演诊断</h3>
+                    <p className="text-slate-500 text-xs leading-relaxed mb-4">
                       AI 深度解析 BP，对标 500+ 活跃 VC，提供估值建议与路演优化。
                     </p>
-                    <button className="w-full py-3 bg-slate-50 text-slate-900 rounded-2xl font-bold hover:bg-indigo-600 hover:text-white transition-all">
+                    <button className="w-full py-3 bg-slate-50 text-slate-900 rounded-2xl font-bold hover:bg-indigo-600 hover:text-white transition-all text-sm">
                       立即开始
                     </button>
                   </div>
 
-                  <div className="bg-white p-8 rounded-[2.5rem] border border-slate-200 hover:shadow-xl transition-all group">
-                    <div className="w-14 h-14 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-emerald-600 group-hover:text-white transition-all">
-                      <ShieldCheck size={28} />
+                  <div className={cn("bg-white rounded-[2.5rem] border border-slate-200 hover:shadow-xl transition-all group", viewMode === 'mobile' ? "p-6" : "p-8")}>
+                    <div className={cn("bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center group-hover:bg-emerald-600 group-hover:text-white transition-all", viewMode === 'mobile' ? "w-12 h-12 mb-4" : "w-14 h-14 mb-6")}>
+                      <ShieldCheck size={viewMode === 'mobile' ? 24 : 28} />
                     </div>
-                    <h3 className="text-xl font-bold mb-3">知识产权导航</h3>
-                    <p className="text-slate-500 text-sm leading-relaxed mb-6">
+                    <h3 className={cn("font-bold mb-2", viewMode === 'mobile' ? "text-lg" : "text-xl")}>知识产权导航</h3>
+                    <p className="text-slate-500 text-xs leading-relaxed mb-4">
                       全网扫描技术竞品，预判侵权风险，定制核心技术专利布局策略。
                     </p>
-                    <button className="w-full py-3 bg-slate-50 text-slate-900 rounded-2xl font-bold hover:bg-emerald-600 hover:text-white transition-all">
+                    <button className="w-full py-3 bg-slate-50 text-slate-900 rounded-2xl font-bold hover:bg-emerald-600 hover:text-white transition-all text-sm">
                       立即扫描
                     </button>
                   </div>
 
-                  <div className="bg-white p-8 rounded-[2.5rem] border border-slate-200 hover:shadow-xl transition-all group">
-                    <div className="w-14 h-14 bg-orange-50 text-orange-600 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-orange-600 group-hover:text-white transition-all">
-                      <Rocket size={28} />
+                  <div className={cn("bg-white rounded-[2.5rem] border border-slate-200 hover:shadow-xl transition-all group", viewMode === 'mobile' ? "p-6" : "p-8")}>
+                    <div className={cn("bg-orange-50 text-orange-600 rounded-2xl flex items-center justify-center group-hover:bg-orange-600 group-hover:text-white transition-all", viewMode === 'mobile' ? "w-12 h-12 mb-4" : "w-14 h-14 mb-6")}>
+                      <Rocket size={viewMode === 'mobile' ? 24 : 28} />
                     </div>
-                    <h3 className="text-xl font-bold mb-3">政策申报管家</h3>
-                    <p className="text-slate-500 text-sm leading-relaxed mb-6">
+                    <h3 className={cn("font-bold mb-2", viewMode === 'mobile' ? "text-lg" : "text-xl")}>政策申报管家</h3>
+                    <p className="text-slate-500 text-xs leading-relaxed mb-4">
                       24h 监控政策动态，自动匹配奖补项目，一键生成申报材料初稿。
                     </p>
-                    <button className="w-full py-3 bg-slate-50 text-slate-900 rounded-2xl font-bold hover:bg-orange-600 hover:text-white transition-all">
+                    <button className="w-full py-3 bg-slate-50 text-slate-900 rounded-2xl font-bold hover:bg-orange-600 hover:text-white transition-all text-sm">
                       查看匹配
                     </button>
                   </div>
