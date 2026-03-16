@@ -34,7 +34,9 @@ import {
   Map,
   Check,
   Smartphone,
-  Monitor
+  Monitor,
+  LogIn,
+  User
 } from 'lucide-react';
 import { 
   LineChart, 
@@ -55,6 +57,8 @@ import {
 import OpenAI from 'openai';
 import { cn } from './lib/utils';
 import { EnterpriseProfile, GrowthMilestone, ServiceMatch, SuccessCase } from './types';
+import { signInWithPopup, signOut, onAuthStateChanged } from 'firebase/auth';
+import { auth, googleProvider } from './lib/firebase';
 
 // --- Mock Data for Visualization (10-Year Trajectory) ---
 const growthData = [
@@ -196,7 +200,15 @@ export default function App() {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+    });
+    return () => unsubscribe();
+  }, []);
+
   const [companyName, setCompanyName] = useState('');
+  const [user, setUser] = useState<any>(null);
   const [profile, setProfile] = useState<EnterpriseProfile | null>(null);
   const [chatResponse, setChatResponse] = useState<string | null>(null);
   const [isChatting, setIsChatting] = useState(false);
@@ -634,9 +646,33 @@ export default function App() {
             <a href="#" className="hover:text-indigo-600 transition-colors">智能基金</a>
             <a href="#" className="hover:text-indigo-600 transition-colors">融资服务</a>
             <a href="#" className="hover:text-indigo-600 transition-colors">数据安全</a>
-            <button className="bg-slate-900 text-white px-4 py-2 rounded-full hover:bg-slate-800 transition-all">
-              管理后台
-            </button>
+            {user ? (
+              <div className="flex items-center gap-4">
+                <span className="text-xs font-bold text-slate-900">{user.email}</span>
+                <button 
+                  onClick={() => signOut(auth)}
+                  className="bg-slate-100 hover:bg-slate-200 text-slate-600 px-4 py-2 rounded-xl text-xs font-bold transition-all"
+                >
+                  退出
+                </button>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2">
+                <button 
+                  onClick={() => signInWithPopup(auth, googleProvider)}
+                  className="text-slate-600 hover:text-indigo-600 text-xs font-bold transition-all"
+                >
+                  登录
+                </button>
+                <button 
+                  onClick={() => signInWithPopup(auth, googleProvider)}
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5"
+                >
+                  <UserPlus size={14} />
+                  注册
+                </button>
+              </div>
+            )}
           </div>
           <div className={cn(viewMode === 'mobile' ? "flex" : "lg:hidden")}>
             <button className="p-2 text-slate-600 hover:bg-slate-100 rounded-lg">
