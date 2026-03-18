@@ -62,25 +62,14 @@ import { auth, googleProvider } from './lib/firebase';
 
 // --- Mock Data for Visualization (10-Year Trajectory) ---
 const growthData = [
-  { year: '2024', value: 40, pred: 40, milestone: '申报科技型中小企业', potentialRisks: ['研发投入不足', '核心人才流失'] },
-  { year: '2024.5', value: 48, pred: 48 },
-  { year: '2025', value: 55, pred: 55, milestone: '人员突破 100 人', potentialRisks: ['管理成本激增', '企业文化稀释'] },
-  { year: '2025.5', value: 64, pred: 64 },
-  { year: '2026', value: 72, pred: 72, milestone: '申报高新技术企业', potentialRisks: ['知识产权纠纷', '技术迭代滞后'] },
-  { year: '2026.5', value: null, pred: 84 },
-  { year: '2027', value: null, pred: 95, milestone: '申报专精特新“小巨人”', potentialRisks: ['市场竞争加剧', '供应链波动'] },
-  { year: '2027.5', value: null, pred: 112 },
-  { year: '2028', value: null, pred: 130, milestone: '人员突破 500 人', potentialRisks: ['组织架构僵化', '现金流压力'] },
-  { year: '2028.5', value: null, pred: 155 },
-  { year: '2029', value: null, pred: 180, milestone: '申报省级重点实验室', potentialRisks: ['科研成果转化难', '政策环境变化'] },
-  { year: '2029.5', value: null, pred: 220 },
-  { year: '2030', value: null, pred: 260, milestone: '人员突破 1000 人', potentialRisks: ['全球化扩张阻力', '合规性风险'] },
-  { year: '2030.5', value: null, pred: 320 },
-  { year: '2031', value: null, pred: 380, milestone: '申报国家级工程中心', potentialRisks: ['技术瓶颈突破难', '品牌声誉风险'] },
-  { year: '2031.5', value: null, pred: 450 },
-  { year: '2032', value: null, pred: 520, milestone: '人员突破 2000 人', potentialRisks: ['大企业病', '市场饱和'] },
-  { year: '2032.5', value: null, pred: 610 },
-  { year: '2033', value: null, pred: 700, milestone: '申报行业标准领跑者', potentialRisks: ['颠覆性技术冲击', '反垄断审查'] },
+  { year: '第1年', value: 10, pred: 10, milestone: '工商注册+软件企业备案', benefits: '小微企业减税、软件增值税即征即退', preparation: '核心产品立项、财务建账、团队搭建', potentialRisks: ['研发投入不足', '核心人才流失'] },
+  { year: '第2年', value: 20, pred: 20, milestone: '申报科技型中小企业', benefits: '研发加计扣除、科技补贴', preparation: '3项软著/实用新型专利、研发投入≥3%', potentialRisks: ['管理成本激增', '企业文化稀释'] },
+  { year: '第3年', value: 30, pred: 30, milestone: '办理ISO9001、EMC检测认证', benefits: '认证补贴、客户准入加分', preparation: '产品检测报告、研发流程规范', potentialRisks: ['知识产权纠纷', '技术迭代滞后'] },
+  { year: '第4-5年', value: 50, pred: 50, milestone: '申报高新技术企业', benefits: '所得税15%、嘉兴高企奖励', preparation: '1项发明专利+5项软著、研发投入≥5%', potentialRisks: ['市场竞争加剧', '供应链波动'] },
+  { year: '第6-7年', value: 70, pred: 70, milestone: '申报重点软件企业、市级专精特新', benefits: '两免三减半、研发补贴翻倍', preparation: '软件收入占比≥50%、核心技术壁垒', potentialRisks: ['组织架构僵化', '现金流压力'] },
+  { year: '第8年', value: 85, pred: 85, milestone: '申报省级专精特新', benefits: '资金奖励、国产化替代扶持', preparation: '细分电子元器件市场优势、客户案例', potentialRisks: ['科研成果转化难', '政策环境变化'] },
+  { year: '第9-12年', value: 120, pred: 120, milestone: '申报国家级小巨人', benefits: '大额奖励、人才落户绿色通道', preparation: '研发投入≥6%、3项发明专利、全国客户覆盖', potentialRisks: ['全球化扩张阻力', '合规性风险'] },
+  { year: '第13-15年', value: 180, pred: 180, milestone: '申报电子信息单项冠军', benefits: '国家级扶持、产业链核心地位', preparation: '技术专利池、市场占有率前三、行业标准参与', potentialRisks: ['技术瓶颈突破难', '品牌声誉风险'] },
 ];
 
 // --- AI Background Animation Component ---
@@ -1289,6 +1278,16 @@ export default function App() {
                                       <div className="text-lg font-bold text-slate-900 mb-1">
                                         {data?.milestone || '稳健增长期'}
                                       </div>
+                                      {data?.benefits && (
+                                        <div className="text-xs text-slate-600 mb-1">
+                                          <span className="font-bold text-indigo-600">收益:</span> {data.benefits}
+                                        </div>
+                                      )}
+                                      {data?.preparation && (
+                                        <div className="text-xs text-slate-600 mb-3">
+                                          <span className="font-bold text-indigo-600">准备:</span> {data.preparation}
+                                        </div>
+                                      )}
                                       <div className="text-2xl font-black text-indigo-600 mb-3">
                                         {isPrediction ? data?.pred : data?.value}
                                         <span className="text-xs font-medium text-slate-400 ml-1">成长指数</span>
