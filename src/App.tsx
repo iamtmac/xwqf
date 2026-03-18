@@ -1232,7 +1232,7 @@ export default function App() {
                   <div className={cn("flex justify-between items-center shrink-0", viewMode === 'mobile' ? "mb-4" : "mb-8")}>
                     <h3 className={cn("font-bold flex items-center gap-2 whitespace-nowrap", viewMode === 'mobile' ? "text-sm" : "text-xl")}>
                       <TrendingUp className="text-indigo-600" size={viewMode === 'mobile' ? 16 : 24} />
-                      成长潜力预测
+                      成长路线规划
                     </h3>
                     <div className="flex gap-2 text-[8px] font-bold uppercase tracking-wider">
                       <div className="flex items-center gap-1">
